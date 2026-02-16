@@ -5,25 +5,25 @@ final List<ProductCategory> categorias = [
   ProductCategory(
     nombre: "Hamburguesas",
     productos: [
-      Producto(
+      Product(
         nombre: "Clásica",
         descripcion: "Carne 150g, queso y salsa especial",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp",
         precio: 15000,
       ),
-      Producto(
+      Product(
         nombre: "Doble",
         descripcion: "Doble carne y doble queso",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/front-view-burger-on-stand-compressed_dpvgwa.webp",
         precio: 20000,
       ),
-      Producto(
+      Product(
         nombre: "Clásica",
         descripcion: "Carne 150g, queso y salsa especial",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp",
         precio: 15000,
       ),
-      Producto(
+      Product(
         nombre: "Doble",
         descripcion: "Doble carne y doble queso",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/front-view-burger-on-stand-compressed_dpvgwa.webp",
@@ -34,19 +34,19 @@ final List<ProductCategory> categorias = [
   ProductCategory(
     nombre: "Bebidas",
     productos: [
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
@@ -57,19 +57,19 @@ final List<ProductCategory> categorias = [
   ProductCategory(
     nombre: "Adicionales",
     productos: [
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
@@ -80,31 +80,31 @@ final List<ProductCategory> categorias = [
   ProductCategory(
     nombre: "Adicionales 2",
     productos: [
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",
         precio: 5000,
       ),
-      Producto(
+      Product(
         nombre: "Coca Cola",
         descripcion: "500ml",
         imagen: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/R_v1iews.jpg",

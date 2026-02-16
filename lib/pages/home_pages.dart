@@ -1,10 +1,8 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:lacarta/constant/custom_colors.dart';
 import 'package:lacarta/constant/list_producto.dart';
-import 'package:lacarta/models/producto.dart';
 import 'package:lacarta/widget/mobile/header_mobile.dart';
 import 'package:lacarta/widget/mobile/product_mobile.dart';
 import 'package:lacarta/widget/mobile/seach_mobile.dart';
@@ -17,9 +15,6 @@ class HomePages extends StatefulWidget {
 
 class _HomePagesState extends State<HomePages> {
   
-
-
-
   final ScrollController _scrollController = ScrollController();
   int selectedCategory = 0;
   final Map<int, double> _categoryOffsets = {};
@@ -50,7 +45,6 @@ class _HomePagesState extends State<HomePages> {
       }
     }
   }
-
 
   void _scrollToCategory(int index) {
     final offset = _categoryOffsets[index];

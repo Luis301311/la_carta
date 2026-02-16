@@ -34,6 +34,7 @@ class PanelInformation extends StatelessWidget {
 
         SizedBox(height: 15),
 
+        /* for(int i = 0; i< 2 ; i++) */
         Row(
           children: [
             Icon(Icons.access_time),

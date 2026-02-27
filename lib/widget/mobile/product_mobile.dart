@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:lacarta/constant/custom_colors.dart';
-import 'package:lacarta/models/category.dart';
+import 'package:lacarta/models/producto.dart';
 
 class ProductMobile extends StatelessWidget {
-  final ProductCategory categoria ;
-  const ProductMobile({super.key , required this.categoria});
-
+  final List<Product> products ;
+  final String productsCategory ;
+  const ProductMobile({super.key , required this.products, required this.productsCategory});
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
+    double titleSize = (screenWidth * 0.04).clamp(14.0, 22.0);
+    double descSize  = (screenWidth * 0.03).clamp(12.0, 18.0);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
       child: Column(
@@ -18,7 +20,7 @@ class ProductMobile extends StatelessWidget {
 
           /// CATEGORIA
           Text(
-            categoria.nombre,
+            productsCategory,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -28,7 +30,7 @@ class ProductMobile extends StatelessWidget {
           const SizedBox(height: 15),
 
           /// PRODUCTOS
-          ...categoria.productos.map((producto) {
+          ...products.map((producto) {
             return Container(
               margin: const EdgeInsets.only(bottom: 15),
               width: double.infinity,
@@ -46,7 +48,7 @@ class ProductMobile extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
                       image: DecorationImage(
-                        image: NetworkImage(producto.imagen),
+                        image: NetworkImage(producto.imageUrl.toString()),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -57,17 +59,17 @@ class ProductMobile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          producto.nombre,
+                          producto.name,
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: titleSize,
                             fontWeight: FontWeight.w600,
                             color: CustomColorBasic.black1,
                           ),
                         ),
                         Text(
-                          producto.descripcion,
+                          producto.description,
                           style: TextStyle(
-                            fontSize: screenWidth * 0.03,
+                            fontSize: descSize,
                             fontWeight: FontWeight.w300,
                             color: CustomColorBasic.grey1,
                           ),
@@ -76,12 +78,12 @@ class ProductMobile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "\$${producto.precio.toStringAsFixed(0)}", style: TextStyle(color: CustomColorBasic.black2),
+                    "\$${producto.basePrice.toStringAsFixed(0)}", style: TextStyle(color: CustomColorBasic.black2),
                   ),
                 ],
               ),
             );
-          }).toList(),
+          })
         ],
       ),
     );

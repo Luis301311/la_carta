@@ -31,9 +31,9 @@ class Product {
       imageUrl: map['imageUrl'],
       isAvailable: map['isAvailable'] ?? true,
       extras: (map['extras'] as List<dynamic>?)
-              ?.map((e) => Extra.fromMap(e, e['id']))
+              ?.map((e) => Extra.fromMap(Map<String, dynamic>.from(e)))
               .toList() ??
-          [],
+    [],
     );
   }
 

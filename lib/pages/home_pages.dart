@@ -1,8 +1,12 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:get/instance_manager.dart';
+import 'package:get/state_manager.dart';
 import 'package:lacarta/constant/custom_colors.dart';
 import 'package:lacarta/constant/list_producto.dart';
+import 'package:lacarta/controller/category_controller.dart';
+import 'package:lacarta/controller/product_controller.dart';
 import 'package:lacarta/widget/mobile/header_mobile.dart';
 import 'package:lacarta/widget/mobile/product_mobile.dart';
 import 'package:lacarta/widget/mobile/seach_mobile.dart';
@@ -14,7 +18,8 @@ class HomePages extends StatefulWidget {
 }
 
 class _HomePagesState extends State<HomePages> {
-  
+  final ProductController productController = Get.put(ProductController());
+  final CategoryController categoryController = Get.put(CategoryController());
   final ScrollController _scrollController = ScrollController();
   int selectedCategory = 0;
   final Map<int, double> _categoryOffsets = {};
@@ -28,7 +33,7 @@ class _HomePagesState extends State<HomePages> {
   void _handleScroll() {
     double offset = _scrollController.offset;
 
-    for (int i = 0; i < categorias.length; i++) {
+    for (int i = 0; i < categoryController.categories.length; i++) {
       double? start = _categoryOffsets[i];
       double? nextStart = _categoryOffsets[i + 1];
 
@@ -78,29 +83,35 @@ class _HomePagesState extends State<HomePages> {
             ),
           ),
           
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-
-                    // posición real
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      final box = context.findRenderObject() as RenderBox?;
-                      if (box != null) {
-                        final position = box.localToGlobal(Offset.zero).dy;
-                        _categoryOffsets[index] = _scrollController.offset + position;
-                      }
-                    });
-
-                    final categoria = categorias[index];
-                    return ProductMobile(categoria: categoria);
+          Obx( (){
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final category = categoryController.categories[index]; 
+                    final productsForCategory = productController.products
+                    .where((p) => p.categoryId == category.id)
+                    .toList();
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+              
+                        // posición real
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          final box = context.findRenderObject() as RenderBox?;
+                          if (box != null) {
+                            final position = box.localToGlobal(Offset.zero).dy;
+                            _categoryOffsets[index] = _scrollController.offset + position;
+                          }
+                        });
+                        //vistas productos
+                        
+                        return ProductMobile(products: productsForCategory, productsCategory: category.name,);
+                      },
+                    );
                   },
-                );
-              },
-              childCount: categorias.length,
-            ),
+                  childCount: categoryController.categories.length,
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -115,7 +126,7 @@ class _HomePagesState extends State<HomePages> {
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      itemCount: categorias.length,
+      itemCount: categoryController.categories.length,
       itemBuilder: (context, index) {
 
         final bool isSelected = selectedCategory == index;
@@ -145,7 +156,7 @@ class _HomePagesState extends State<HomePages> {
             ),
             child: Center(
               child: Text(
-                categorias[index].nombre,
+                categoryController.categories[index].name,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,

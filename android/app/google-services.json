@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "958104916805",
+    "project_id": "lacarta-1a",
+    "storage_bucket": "lacarta-1a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958104916805:android:f98b0e09e7357ada57a42c",
+        "android_client_info": {
+          "package_name": "com.example.lacarta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjAdxaoGSt8KAL6qq_rtgSFXG-d4w4INg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

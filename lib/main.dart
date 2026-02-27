@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
         primaryColor: Colors.blue
-        
       ),
       home: IndexPages(),
     );

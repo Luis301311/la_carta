@@ -7,7 +7,6 @@ class ProductController extends GetxController{
   RxList<Product> products= <Product>[].obs;
   RxList<Product> filteredProducts = <Product>[].obs;
   RxBool isLoading = false.obs;
-
   @override
   void onInit() {
     super.onInit();
@@ -28,7 +27,7 @@ class ProductController extends GetxController{
   }
 
 
-    Future<void> createProduct(Product product) async {
+  Future<void> createProduct(Product product) async {
     isLoading.value = true;
     try {
       final id = await _productServices.saveProduct(product);
@@ -43,8 +42,17 @@ class ProductController extends GetxController{
     }
   }
 
+  void filteredProductForCategory(String query) {
+    if (query.isEmpty) {
+      filteredProducts.value = products;
+    } else {
+      filteredProducts.value = products.where((box) {
+        return  (box.categoryId.toString()).toLowerCase() == query.toLowerCase();
+      }).toList();
+    }
+  }
 
-    void filteredProduct(String query) {
+  void filteredProduct(String query) {
     if (query.isEmpty) {
       filteredProducts.value = products;
     } else {
@@ -54,4 +62,7 @@ class ProductController extends GetxController{
       }).toList();
     }
   }
+
+
+  
 }

@@ -1,7 +1,10 @@
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:lacarta/constant/custom_colors.dart';
 import 'package:lacarta/pages/home_pages.dart';
+import 'package:lacarta/pages/select_product.dart';
+import 'package:lacarta/pages/test_page.dart';
 
 class IndexPages extends StatefulWidget {
   const IndexPages({super.key});
@@ -9,20 +12,20 @@ class IndexPages extends StatefulWidget {
   @override
   State<IndexPages> createState() => _IndexPagesState();
 }
+  int selectedIndex = 0; 
+  final List<Widget> pages =<Widget>[HomePages(), TestPage(), SelectProduct()];  // VISTAS
 
 class _IndexPagesState extends State<IndexPages> {
   @override
   Widget build(BuildContext context) {
-    int selectedIndex = 0; 
-    final List<Widget> pages =<Widget>[HomePages(), HomePages()];  // VISTAS
 
     return Scaffold(
       body: pages[selectedIndex],
       bottomNavigationBar: CurvedNavigationBar(
         items: [
-          _buildNavItem(Icons.restaurant, "Menu", 0, selectedIndex),
-          _buildNavItem(Icons.receipt_long, "Pedido", 1, selectedIndex),
-          _buildNavItem(Icons.place, "Ubicacion", 2, selectedIndex)
+          _buildNavItem(Icons.restaurant, "Menu", 0),
+          _buildNavItem(Icons.receipt_long, "Pedido", 1),
+          _buildNavItem(Icons.place, "Ubicacion", 2)
         ],
         onTap: (value) {
            setState(() {
@@ -42,7 +45,7 @@ class _IndexPagesState extends State<IndexPages> {
 }
 
 
-Widget _buildNavItem(IconData icon, String label, int index, int selectedIndex ) {
+Widget _buildNavItem(IconData icon, String label, int index,) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [

@@ -1,21 +1,18 @@
 class Extra {
-  final String id;
   final String name;
   final double price;
   final bool isRequired;
   final bool isActive;
 
   Extra({
-    required this.id,
     required this.name,
     required this.price,
     this.isRequired = false,
     this.isActive = true,
   });
 
-  factory Extra.fromMap(Map<String, dynamic> map, String id) {
+  factory Extra.fromMap(Map<String, dynamic> map) {
     return Extra(
-      id: id,
       name: map['name'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
       isRequired: map['isRequired'] ?? false,

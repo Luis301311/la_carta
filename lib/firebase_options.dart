@@ -17,17 +17,11 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -72,6 +66,24 @@ class DefaultFirebaseOptions {
     authDomain: 'lacarta-1a.firebaseapp.com',
     storageBucket: 'lacarta-1a.firebasestorage.app',
     measurementId: 'G-2YC2CMTT73',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyC2YwMQvIXcTMMnnIM8XzCYG48Jte_4C7Q',
+    appId: '1:958104916805:web:ce884b15c27a619c57a42c',
+    messagingSenderId: '958104916805',
+    projectId: 'lacarta-1a',
+    authDomain: 'lacarta-1a.firebaseapp.com',
+    storageBucket: 'lacarta-1a.firebasestorage.app',
+    measurementId: 'G-2YC2CMTT73',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCjAdxaoGSt8KAL6qq_rtgSFXG-d4w4INg',
+    appId: '1:958104916805:android:f98b0e09e7357ada57a42c',
+    messagingSenderId: '958104916805',
+    projectId: 'lacarta-1a',
+    storageBucket: 'lacarta-1a.firebasestorage.app',
   );
 
 }

@@ -1,4 +1,4 @@
-import 'package:lacarta/models/extra.dart';
+import 'package:lacarta/models/extra_group.dart';
 
 class Product {
   String? id;
@@ -7,7 +7,7 @@ class Product {
   final double basePrice;
   final String categoryId;
   final String? imageUrl;
-  final List<Extra> extras;
+  final List<ExtraGroup> extras;
   final bool isAvailable;
 
   Product({
@@ -31,7 +31,7 @@ class Product {
       imageUrl: map['imageUrl'],
       isAvailable: map['isAvailable'] ?? true,
       extras: (map['extras'] as List<dynamic>?)
-              ?.map((e) => Extra.fromMap(Map<String, dynamic>.from(e)))
+              ?.map((e) => ExtraGroup.fromMap(Map<String, dynamic>.from(e)))
               .toList() ??
     [],
     );

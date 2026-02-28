@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lacarta/controller/cart_controller.dart';
 import 'package:lacarta/index_pages.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,7 +10,7 @@ void main() async{
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  Get.put(CartController());
   runApp(const MyApp());
 }
 

@@ -16,7 +16,6 @@ class SeachMobile extends StatelessWidget {
           Expanded(
             child: TextField(
               onChanged: (value) {
-                addProducts();
               },
               decoration: InputDecoration(
                 border: OutlineInputBorder(

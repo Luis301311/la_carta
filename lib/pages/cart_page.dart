@@ -11,10 +11,12 @@ class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CustomColorBasic.white2,
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.blue,
         ),
+        backgroundColor: CustomColorBasic.white2,
         title: const Text("Pedido"),
         actions: [
           IconButton(
@@ -41,6 +43,7 @@ class CartPage extends StatelessWidget {
                   final item = cartController.cartItems[index];
 
                   return Card(
+                    color: CustomColorBasic.white3,
                     margin: const EdgeInsets.all(10),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
@@ -61,7 +64,7 @@ class CartPage extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                "\$ ${item.product.basePrice}",
+                                "\$ ${item.total}",
                               ),
                             ],
                           ),
@@ -94,7 +97,7 @@ class CartPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: CustomColorBasic.white2,
                 boxShadow: [
                   BoxShadow(
                     blurRadius: 5,

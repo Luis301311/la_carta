@@ -1,23 +1,15 @@
+
 import 'package:get/get.dart';
 import 'package:lacarta/models/cart.dart';
-import 'package:lacarta/models/producto.dart';
 
 class CartController extends GetxController {
 
   var cartItems = <CartItem>[].obs;
 
-  void addToCart(Product product, int quantity) {
-    final index =
-        cartItems.indexWhere((item) => item.product.id == product.id);
-
-    if (index >= 0) {
-      cartItems[index].quantity += quantity;
-      cartItems.refresh();
-    } else {
+  void addToCart(CartItem cartItem) {
       cartItems.add(
-        CartItem(product: product, quantity: quantity),
+        cartItem
       );
-    }
   }
 
   void increaseQuantity(CartItem item) {
@@ -38,12 +30,11 @@ class CartController extends GetxController {
     cartItems.clear();
   }
 
-  int get totalItems =>
-      cartItems.fold(0, (sum, item) => sum + item.quantity);
+  int get totalItems =>cartItems.fold(0, (sum, item) => sum + item.quantity);
 
   double get totalCart =>
       cartItems.fold(
         0,
-        (sum, item) => sum + (item.product.basePrice * item.quantity),
+        (sum, item) => sum + (item.total),
       );
 }

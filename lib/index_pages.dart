@@ -2,6 +2,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:lacarta/constant/custom_colors.dart';
+import 'package:lacarta/pages/cart_page.dart';
 import 'package:lacarta/pages/home_pages.dart';
 import 'package:lacarta/pages/test_page.dart';
 
@@ -12,7 +13,7 @@ class IndexPages extends StatefulWidget {
   State<IndexPages> createState() => _IndexPagesState();
 }
   int selectedIndex = 0; 
-  final List<Widget> pages =<Widget>[HomePages(), TestPage(), TestPage()];  // VISTAS
+  final List<Widget> pages =<Widget>[HomePages(), CartPage(), TestPage()];  // VISTAS
 
 class _IndexPagesState extends State<IndexPages> {
   @override

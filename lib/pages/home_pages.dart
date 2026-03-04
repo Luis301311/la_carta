@@ -93,7 +93,6 @@ class _HomePagesState extends State<HomePages> {
                     .toList();
                     return LayoutBuilder(
                       builder: (context, constraints) {
-              
                         // posición real
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           final box = context.findRenderObject() as RenderBox?;

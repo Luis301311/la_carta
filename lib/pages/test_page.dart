@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lacarta/constant/list_producto.dart';
+import 'package:lacarta/constant/custom_colors.dart';
 class TestPage extends StatefulWidget {
   const TestPage({super.key});
 
@@ -11,7 +11,8 @@ class _TestPageState extends State<TestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IconButton(onPressed: (){addProductss();}, icon: Icon(Icons.construction)),
+      backgroundColor: CustomColorBasic.white2,
+      body: Center(child: Text("En desarrollo")),
     );
   }
 }

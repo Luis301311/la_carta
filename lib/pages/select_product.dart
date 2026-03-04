@@ -92,8 +92,8 @@ class ProductDetailPage extends StatelessWidget {
 
                       const SizedBox(height: 5),
 
-                      const Text(
-                        "Ingredientes o detalles del producto",
+                       Text(
+                        productoController.product.description,
                         style: TextStyle(
                           color: Colors.grey,
                         ),
@@ -101,7 +101,7 @@ class ProductDetailPage extends StatelessWidget {
 
                       const SizedBox(height: 10),
 
-                      /// 💲 Precio base
+                      // Precio base
                       Text(
                         "\$ ${product.basePrice.toStringAsFixed(0)}",
                         style: const TextStyle(
@@ -130,26 +130,56 @@ class ProductDetailPage extends StatelessWidget {
                                   "Obligatorio",
                                   style: TextStyle(color: Colors.red),
                                 ),
+...group.options.map((option) {
+  return Obx(() {
+    final qty =
+        productoController.getQuantity(group, option);
 
+    return ListTile(
+      title: Text(option.name),
+      subtitle: option.price > 0
+          ? Text("+ \$${option.price}")
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+
+          // Botón -
+          IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: qty > 0
+                ? () => productoController
+                    .decrementExtra(group, option)
+                : null,
+          ),
+
+          // Cantidad
+          Text(
+            qty.toString(),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          // Botón +
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () =>
+                productoController
+                    .incrementExtra(group, option),
+          ),
+        ],
+      ),
+    );
+  });
+}),
                               const SizedBox(height: 10),
 
-                              ...group.options.map((option) {
+                          
 
-                                return Obx(() {
-                                  final selected = productoController.isSelected(group, option);
-                                  return CheckboxListTile(
-                                    value: selected,
-                                    onChanged: (_) {
-                                      productoController.toggleExtra(group, option);
-                                    },
-                                    title: Text(option.name),
-                                    subtitle: option.price > 0
-                                        ? Text("+ \$${option.price}")
-                                        : null,
-                                  );
-                                });
 
-                              }).toList(),
+
                               const SizedBox(height: 20),
                             ],
                           );
@@ -189,7 +219,6 @@ class ProductDetailPage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-
                           /// Botones -
                           Container(
                             decoration: BoxDecoration(

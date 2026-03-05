@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/constant/custom_colors.dart';
+import 'package:lacarta/controller/order_controller.dart';
 import 'package:lacarta/controller/product_detail_controller.dart';
 import 'package:lacarta/models/producto.dart';
 import 'package:lacarta/pages/cart_page.dart';
+import 'package:lacarta/widget/mobile/order_type.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final Product product;
@@ -11,7 +13,7 @@ class ProductDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProductDetailController productoController = Get.put(ProductDetailController(product));
-   
+    final OrderController orderController = Get.put(OrderController());
     return Scaffold(
       backgroundColor: CustomColorBasic.white1,
       body: SafeArea(
@@ -28,23 +30,25 @@ class ProductDetailPage extends StatelessWidget {
                     onPressed: () {
                       Get.back();
                     },
-                    icon: const Icon(Icons.arrow_back, size: 28, color: Colors.blue,)),
-                  Row(
+                    icon: const Icon(Icons.arrow_back, size: 28, color: Colors.blue,)
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.search),
-                      SizedBox(width: 15),
                       IconButton(
                         onPressed: (){ 
                           Get.to(()=>CartPage());
                           },
-                        icon: Icon(Icons.receipt_long,)),
+                        icon: Icon(Icons.receipt_long,)
+                      ),
+                      Text("Pedido", style: TextStyle( fontSize: 12),)
                     ],
                   )
                 ],
               ),
             ),
 
-            /// 📦 Contenido
+            ///  Contenido
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -59,7 +63,7 @@ class ProductDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      /// 🖼 Imagen
+                      /// Imagen
                       Container(
                         height: 400,
                         width: double.infinity,
@@ -130,56 +134,50 @@ class ProductDetailPage extends StatelessWidget {
                                   "Obligatorio",
                                   style: TextStyle(color: Colors.red),
                                 ),
-...group.options.map((option) {
-  return Obx(() {
-    final qty =
-        productoController.getQuantity(group, option);
+                                ...group.options.map((option) {
+                                  return Obx(() {
+                                    final qty =
+                                        productoController.getQuantity(group, option);
 
-    return ListTile(
-      title: Text(option.name),
-      subtitle: option.price > 0
-          ? Text("+ \$${option.price}")
-          : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+                                    return ListTile(
+                                      title: Text(option.name),
+                                      subtitle: option.price > 0
+                                          ? Text("+ \$${option.price}")
+                                          : null,
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
 
-          // Botón -
-          IconButton(
-            icon: const Icon(Icons.remove),
-            onPressed: qty > 0
-                ? () => productoController
-                    .decrementExtra(group, option)
-                : null,
-          ),
+                                          // Botón -
+                                          IconButton(
+                                            icon: const Icon(Icons.remove),
+                                            onPressed: qty > 0
+                                                ? () => productoController
+                                                    .decrementExtra(group, option)
+                                                : null,
+                                          ),
 
-          // Cantidad
-          Text(
-            qty.toString(),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+                                          // Cantidad
+                                          Text(
+                                            qty.toString(),
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
 
-          // Botón +
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () =>
-                productoController
-                    .incrementExtra(group, option),
-          ),
-        ],
-      ),
-    );
-  });
-}),
-                              const SizedBox(height: 10),
-
-                          
-
-
-
+                                          // Botón +
+                                          IconButton(
+                                            icon: const Icon(Icons.add),
+                                            onPressed: () =>
+                                                productoController
+                                                    .incrementExtra(group, option),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  });
+                                }),
                               const SizedBox(height: 20),
                             ],
                           );
@@ -188,7 +186,7 @@ class ProductDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 25),
 
-                      /// 💬 Comentarios
+                      ///  Comentarios
                       const Text(
                         "Comentarios",
                         style: TextStyle(fontWeight: FontWeight.w600),
@@ -197,6 +195,9 @@ class ProductDetailPage extends StatelessWidget {
                       const SizedBox(height: 8),
 
                       TextField(
+                        onChanged: (value) {
+                          productoController.comment.value = value; 
+                        },
                         maxLines: 3,
                         decoration: InputDecoration(
                           hintText: "Opcional",
@@ -208,7 +209,7 @@ class ProductDetailPage extends StatelessWidget {
 
                       const SizedBox(height: 25),
 
-                      /// 🔢 Cantidad
+                      ///  Cantidad
                       const Text(
                         "Cantidad",
                         style: TextStyle(fontWeight: FontWeight.w600),
@@ -288,7 +289,24 @@ class ProductDetailPage extends StatelessWidget {
                             backgroundColor: CustomColorBasic.blue1,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                             productoController.buyNow(product);
+                              Get.bottomSheet(
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                ),
+                                child: Obx(() => OrderTypeSelector(
+                                      selectedType: orderController.orderType.value,
+                                      onSelected: (type) {
+                                        orderController.orderType.value = type;
+                                      },
+                                )),
+                              )
+                            );
+                          },
                           child: const Text(
                             "Comprar ahora",
                             style: TextStyle(fontSize: 16, color: CustomColorBasic.white1),

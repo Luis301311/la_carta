@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:lacarta/models/cart.dart';
 
 class CartController extends GetxController {
-
-  var cartItems = <CartItem>[].obs;
+  RxBool isLoading = false.obs; 
+  var cartItems = <CartItem>[].obs;  //pedido
 
   void addToCart(CartItem cartItem) {
       cartItems.add(
@@ -32,9 +32,16 @@ class CartController extends GetxController {
 
   int get totalItems =>cartItems.fold(0, (sum, item) => sum + item.quantity);
 
-  double get totalCart =>
-      cartItems.fold(
-        0,
-        (sum, item) => sum + (item.total),
-      );
+  double get totalCart =>cartItems.fold(0, (sum, item) => sum + (item.total),);
+
+  Future<void>  createCartOrder(List<CartItem> order ) async{
+    isLoading.value = true;
+    try {
+
+    } catch (e) {
+      Get.snackbar('Error', 'No se pudo realizar el pedido');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

@@ -8,12 +8,13 @@ import 'package:lacarta/models/producto.dart';
 
 class ProductDetailController extends GetxController {
 
+   final CartController _cartController = Get.put((CartController()));
   final Product product;
 
   ProductDetailController(this.product);
 
   var quantity = 1.obs;
-
+  var comment = "".obs;
   // groupId -> { optionId : cantidad }
   RxMap<String, Map<String, int>> selectedExtras =<String, Map<String, int>>{}.obs;
 
@@ -113,34 +114,43 @@ class ProductDetailController extends GetxController {
   // ===============================
   // CARRITO
   // ===============================
-List<CartExtra> buildCartExtras() {
+  List<CartExtra> buildCartExtras() {
 
-  List<CartExtra> result = [];
+    List<CartExtra> result = [];
 
-  selectedExtras.forEach((groupId, optionsMap) {
+    selectedExtras.forEach((groupId, optionsMap) {
 
-    final group = product.extras
-        .firstWhere((g) => g.id == groupId);
+      final group = product.extras
+          .firstWhere((g) => g.id == groupId);
 
-    optionsMap.forEach((optionId, quantity) {
+      optionsMap.forEach((optionId, quantity) {
 
-      final option = group.options
-          .firstWhere((o) => o.id == optionId);
+        final option = group.options
+            .firstWhere((o) => o.id == optionId);
 
-      result.add(
-        CartExtra(
-          groupId: groupId,
-          optionId: optionId,
-          optionName: option.name,
-          price: option.price,
-          quantity: quantity,
-        ),
-      );
+        result.add(
+          CartExtra(
+            groupId: groupId,
+            optionId: optionId,
+            optionName: option.name,
+            price: option.price,
+            quantity: quantity,
+          ),
+        );
+      });
     });
-  });
 
-  return result;
-}
+    return result;
+  }
+
+
+
+
+
+
+
+
+
 
 
   void addToCart() {
@@ -154,6 +164,7 @@ List<CartExtra> buildCartExtras() {
         product: product,
         quantity: quantity.value,
         extras: buildCartExtras(),
+        comment: comment.value,
       )
     );
 
@@ -162,6 +173,20 @@ List<CartExtra> buildCartExtras() {
       "Producto agregado al pedido",
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 3),
+    );
+  }
+
+  void buyNow(Product product) {
+    if (!validateRequired()) return;
+    _cartController.clearCart();
+
+    _cartController.addToCart(
+      CartItem(
+        product: product,
+        quantity: quantity.value,
+        extras: buildCartExtras(),
+        comment: comment.value,
+      ),
     );
   }
 }

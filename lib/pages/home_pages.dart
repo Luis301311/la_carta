@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get/state_manager.dart';
 import 'package:lacarta/constant/custom_colors.dart';
-import 'package:lacarta/constant/list_producto.dart';
 import 'package:lacarta/controller/category_controller.dart';
 import 'package:lacarta/controller/product_controller.dart';
 import 'package:lacarta/widget/mobile/header_mobile.dart';

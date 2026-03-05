@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lacarta/constant/custom_colors.dart';
-import 'package:lacarta/widget/panel_information.dart';
+import 'package:lacarta/widget/mobile/panel_information.dart';
 
 class HeaderMobile extends StatelessWidget {
   const HeaderMobile({super.key});

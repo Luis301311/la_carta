@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/constant/custom_colors.dart';
 import 'package:lacarta/controller/cart_controller.dart';
+import 'package:lacarta/controller/order_controller.dart';
+import 'package:lacarta/widget/mobile/order_type.dart';
 
 class CartPage extends StatelessWidget {
   CartPage({super.key});
 
   final CartController cartController = Get.find<CartController>();
+  final OrderController orderController = Get.put(OrderController());
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +72,7 @@ class CartPage extends StatelessWidget {
                             ],
                           ),
 
-                          /// ➖➕ Cantidad
+                          /// Cantidad
                           Row(
                             children: [
                               IconButton(
@@ -93,7 +96,7 @@ class CartPage extends StatelessWidget {
               ),
             ),
 
-            /// 💰 Total + Pagar
+            ///  Total + Pagar
             Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
@@ -136,11 +139,21 @@ class CartPage extends StatelessWidget {
                         foregroundColor: CustomColorBasic.white1
                       ),
                       onPressed: () {
-                        Get.snackbar(
-                          "Pago",
-                          "Procesando pago...",
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
+                        Get.bottomSheet(
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              child: Obx(() => OrderTypeSelector(
+                                    selectedType: orderController.orderType.value,
+                                    onSelected: (type) {
+                                      orderController.orderType.value = type;
+                                    },
+                              )),
+                            )
+                          );
                       },
                       child: const Text("Pagar", style: TextStyle(fontSize: 15),),
                     ),

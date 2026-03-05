@@ -14,4 +14,15 @@ class CartExtra {
   });
 
   double get total => price * quantity;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'groupId': groupId,
+      'optionId': optionId,
+      'optionName': optionName,
+      'price': price,
+      'quantity': quantity,
+      'total': total,
+    };
+  }
 }

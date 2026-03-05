@@ -14,5 +14,5 @@ class CustomColorBasic  {
   static  const Color green1 = Color(0xFF2ECC71); 
   static  const Color yellow = Color(0xFFF4980A); 
   static  const Color yellow2 = Color(0xFFF1C40F); 
-  static  const Color blue1 = Color(0xFF016592); 
+  static  const Color blue1 = Color(0xFF016592);  //Boton pago
 }

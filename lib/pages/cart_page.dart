@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:lacarta/constant/custom_colors.dart';
 import 'package:lacarta/controller/cart_controller.dart';
 import 'package:lacarta/controller/order_controller.dart';
-import 'package:lacarta/widget/mobile/order_type.dart';
+import 'package:lacarta/widget/mobile/form/order_type.dart';
 
 class CartPage extends StatelessWidget {
   CartPage({super.key});

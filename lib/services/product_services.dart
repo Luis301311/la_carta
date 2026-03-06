@@ -1,15 +1,16 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lacarta/main.dart';
 import 'package:lacarta/models/producto.dart';
 
 class ProductServices {
   final String productCollection = "products";
-  final FirebaseFirestore _firebaseStorage = FirebaseFirestore.instance;
+  final FirebaseFirestore _firebaseFirestore = clientDb;
 
   //SAVE
 
   Future<String> saveProduct(Product product) async {
-    final doc = await FirebaseFirestore.instance
+    final doc = await _firebaseFirestore
         .collection(productCollection)
         .add(product.toMap());
     return doc.id;
@@ -17,7 +18,7 @@ class ProductServices {
   
   ///GET
   Future<List<Product>> getProducts() async {
-    final snapshot = await _firebaseStorage
+    final snapshot = await _firebaseFirestore
         .collection(productCollection)
         .get();
 
@@ -28,7 +29,7 @@ class ProductServices {
 
   //UPDATE
   Future<void> updateProduct(Product product) async {
-    await _firebaseStorage
+    await _firebaseFirestore
         .collection(productCollection)
         .doc(product.id)
         .update(product.toMap());
@@ -75,9 +76,9 @@ class ProductServices {
   } */
 
 /*   Future<String> saveProduct(Product product) async {
-    final batch = _firebaseStorage.batch();
+    final batch = _firebaseFirestore.batch();
 
-    final categoryRef = _firebaseStorage.collection('categories').doc(product.categoryId);
+    final categoryRef = _firebaseFirestore.collection('categories').doc(product.categoryId);
 
     final productRef = categoryRef.collection(productCollection).doc();
 

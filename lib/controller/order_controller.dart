@@ -15,11 +15,16 @@ class OrderController  extends GetxController{
 
   Future<void> sendToWhatsApp(OrderCart order) async {
     final message = buildWhatsAppMessage(order);
+    final phone = "573174210412";
 
-    final url =
-        "https://wa.me/573174210412?text=$message"; // número del restaurante
+    final url = Uri.parse(
+      "https://wa.me/$phone?text=$message",
+    );
 
-    await launchUrl(Uri.parse(url));
+    await launchUrl(
+      url,
+      webOnlyWindowName: "_blank",
+    );
   }
 
 

@@ -36,7 +36,7 @@ class ProductController extends GetxController{
       filteredProducts.value = products;
       Get.snackbar('Éxito', 'Producto creado correctamente');
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo crear el producto');
+      print(e.toString());
     } finally {
       isLoading.value = false;
     }

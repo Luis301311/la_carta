@@ -5,7 +5,7 @@ import 'package:lacarta/controller/order_controller.dart';
 import 'package:lacarta/controller/product_detail_controller.dart';
 import 'package:lacarta/models/producto.dart';
 import 'package:lacarta/pages/cart_page.dart';
-import 'package:lacarta/widget/mobile/order_type.dart';
+import 'package:lacarta/widget/mobile/form/order_type.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final Product product;
@@ -63,26 +63,51 @@ class ProductDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      /// Imagen
-                      Container(
-                        height: 400,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(15),
+                       Column(
+                        children: [
+
+                          /// IMAGENES
+                          SizedBox(
+                            height: 300,
+                            width: double.infinity,
+                            child: PageView.builder(
+                              itemCount: product.imageUrl.length,
+                              onPageChanged: (index) {
+                                productoController.currentPage.value = index;
+                              },
+                              itemBuilder: (context, index) {
+                                return Image.network(
+                                  product.imageUrl[index],
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          /// INDICADOR
+                        Obx(() => Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          product.imageUrl.length,
+                          (index) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: productoController.currentPage.value == index ? 12 : 8,
+                              height: productoController.currentPage.value == index ? 12 : 8,
+                              decoration: BoxDecoration(
+                                color: productoController.currentPage.value == index
+                                    ? Colors.black
+                                    : Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            );
+                          },
                         ),
-                        child: const Center(
-                          child: Text("Imagen del producto"),
-                        ),
+                      )),
+                        ],
                       ),
-
-                      const SizedBox(height: 10),
-
-                      /// Indicador
-                      const Center(
-                        child: Text("1/3"),
-                      ),
-
                       const SizedBox(height: 20),
 
                       /// 🏷 Nombre

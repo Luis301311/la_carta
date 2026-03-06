@@ -8,9 +8,9 @@ import 'package:lacarta/models/producto.dart';
 
 class ProductDetailController extends GetxController {
 
-   final CartController _cartController = Get.put((CartController()));
+  final CartController _cartController = Get.put((CartController()));
   final Product product;
-
+  final currentPage = 0.obs;
   ProductDetailController(this.product);
 
   var quantity = 1.obs;

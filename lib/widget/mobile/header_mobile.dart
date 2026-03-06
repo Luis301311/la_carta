@@ -66,14 +66,14 @@ class HeaderMobile extends StatelessWidget {
                   child: 
                     ClipOval(
                       child: Image.network(
-                        "https://res.cloudinary.com/dkxiwcgla/image/upload/v1729003658/logo_yyorlv.png", 
+                        "https://res.cloudinary.com/dkxiwcgla/image/upload/v1772775533/ChatGPT_Image_6_mar_2026_12_38_20_a.m._rwwfeq.png", 
                         fit: BoxFit.contain,
                     ))
                 ),
                 SizedBox(height: 10,),
 
                 //NOMBRE
-                Text("NOMBRE DEL RESTAURANTE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.04),),
+                Text("QUICK BITE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.04),),
                 SizedBox(height: 10,),
 
                 //INFORMACION

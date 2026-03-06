@@ -6,7 +6,7 @@ class Product {
   final String description;
   final double basePrice;
   final String categoryId;
-  final String? imageUrl;
+  final List<String> imageUrl;
   final List<ExtraGroup> extras;
   final bool isAvailable;
 
@@ -16,7 +16,7 @@ class Product {
     required this.description,
     required this.basePrice,
     required this.categoryId,
-    this.imageUrl,
+    this.imageUrl = const [],
     this.extras = const [],
     this.isAvailable = true,
   });
@@ -28,12 +28,16 @@ class Product {
       description: map['description'] ?? '',
       basePrice: (map['basePrice'] ?? 0).toDouble(),
       categoryId: map['categoryId'] ?? '',
-      imageUrl: map['imageUrl'],
+      imageUrl: map['imageUrl'] != null
+          ? List<String>.from(map['imageUrl'])
+          : [],
       isAvailable: map['isAvailable'] ?? true,
-      extras: (map['extras'] as List<dynamic>?)
-              ?.map((e) => ExtraGroup.fromMap(Map<String, dynamic>.from(e)))
+      extras: (map['extras'] as List?)
+              ?.map((e) => ExtraGroup.fromMap(
+                    Map<String, dynamic>.from(e),
+                  ))
               .toList() ??
-    [],
+          [],
     );
   }
 

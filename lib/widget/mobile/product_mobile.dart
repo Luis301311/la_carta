@@ -54,7 +54,7 @@ class ProductMobile extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: DecorationImage(
-                          image: NetworkImage(producto.imageUrl.toString()),
+                          image: NetworkImage(producto.imageUrl[0].toString()),
                           fit: BoxFit.cover,
                         ),
                       ),

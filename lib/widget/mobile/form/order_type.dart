@@ -55,6 +55,8 @@ class OrderTypeSelector extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 icon,
@@ -67,6 +69,7 @@ class OrderTypeSelector extends StatelessWidget {
                 style: TextStyle(
                   color: selected ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
+                  fontSize: 12
                 ),
               )
             ],
@@ -80,7 +83,7 @@ class OrderTypeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildOption(context, OrderType.dineIn, "Consumir aquí", Icons.restaurant),
+        _buildOption(context, OrderType.dineIn, "Consumir aqui", Icons.restaurant),
         _buildOption(context, OrderType.takeaway, "Para llevar", Icons.shopping_bag),
         _buildOption(context, OrderType.delivery, "Domicilio", Icons.delivery_dining),
       ],

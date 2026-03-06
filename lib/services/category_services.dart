@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lacarta/main.dart';
 import 'package:lacarta/models/category.dart';
 
 class CategoryServices {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final FirebaseFirestore _firestore = clientDb;
   final String collection = 'categories';
-
 
   /// SAVE
   Future<String> saveCategory(ProductCategory category) async {

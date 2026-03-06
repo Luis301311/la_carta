@@ -18,7 +18,7 @@ final List<Product> products = [
     description: "Carne 100% res con queso y tocino",
     basePrice: 18000,
     categoryId: "burgers",
-    imageUrl: "https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp",
+    imageUrl: ["https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp"],
     isAvailable: true,
     extras: [
       ExtraGroup(
@@ -49,7 +49,7 @@ final List<Product> products = [
     description: "Doble carne 100% res con queso cheddar",
     basePrice: 22000,
     categoryId: "burgers",
-    imageUrl: "https://res.cloudinary.com/demo/image/upload/hamburguesa_doble.webp",
+    imageUrl: ["https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp"],
     isAvailable: true,
     extras: [
       ExtraGroup(
@@ -80,7 +80,7 @@ final List<Product> products = [
     description: "Pizza artesanal con salsa napolitana y pepperoni",
     basePrice: 28000,
     categoryId: "pizzas",
-    imageUrl: "https://res.cloudinary.com/demo/image/upload/pizza_pepperoni.webp",
+    imageUrl: ["https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp"],
     isAvailable: true,
     extras: [
       ExtraGroup(
@@ -111,7 +111,7 @@ final List<Product> products = [
     description: "Salchicha premium con papas, queso y salsas",
     basePrice: 15000,
     categoryId: "combos",
-    imageUrl: "https://res.cloudinary.com/demo/image/upload/perro_especial.webp",
+    imageUrl: ["https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp"],
     isAvailable: true,
     extras: [
       ExtraGroup(
@@ -142,7 +142,7 @@ final List<Product> products = [
     description: "Hamburguesa sencilla con papas y bebida",
     basePrice: 25000,
     categoryId: "combos",
-    imageUrl: "https://res.cloudinary.com/demo/image/upload/combo_burger.webp",
+    imageUrl: ["https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp"],
     isAvailable: true,
     extras: [
       ExtraGroup(
@@ -192,7 +192,7 @@ final List<Product> products = [
     description: "Cheesecake artesanal con salsa de frutos rojos",
     basePrice: 12000,
     categoryId: "postres",
-    imageUrl: "https://res.cloudinary.com/demo/image/upload/cheesecake.webp",
+    imageUrl: ["https://res.cloudinary.com/dkxiwcgla/image/upload/v1770496861/OIP_ubiul4.webp"],
     isAvailable: true,
     extras: [
       ExtraGroup(
@@ -258,10 +258,10 @@ final List<ProductCategory> categories = [
 ];
 
 void  addProductss() {
-  for(ProductCategory item in categories){
+/*   for(ProductCategory item in categories){
     categoryController.createCategory(item); 
-  }  
-
+  }   
+ */
   for (Product item in products){
     productController.createProduct(item);
   }

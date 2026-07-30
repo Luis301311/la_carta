@@ -38,7 +38,6 @@ class CartPage extends StatelessWidget {
         return Column(
           children: [
 
-            /// 🛒 Lista de productos
             Expanded(
               child: ListView.builder(
                 itemCount: cartController.cartItems.length,

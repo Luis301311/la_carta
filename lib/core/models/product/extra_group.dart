@@ -1,7 +1,7 @@
 import 'package:lacarta/core/models/product/extra_option.dart';
 
 class ExtraGroup {
-  final String id;
+  final String? id;
   final String title;
   final bool isRequired;
   final int minSelection;
@@ -9,7 +9,7 @@ class ExtraGroup {
   final List<ExtraOption> options;
 
   ExtraGroup({
-    required this.id,
+    this.id,
     required this.title,
     required this.isRequired,
     required this.minSelection,

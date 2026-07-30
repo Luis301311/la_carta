@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lacarta/features/menu/pages/index_pages.dart';
+import 'package:lacarta/app_pages.dart';
+import 'package:lacarta/config/app_routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:lacarta/core/controller/cart_controller.dart';
 late FirebaseApp clientApp;
 late FirebaseFirestore clientDb;
+late FirebaseStorage clienteStorage;
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +54,7 @@ Future<void> main() async {
   );
 
   clientDb = FirebaseFirestore.instanceFor(app: clientApp);
+  clienteStorage = FirebaseStorage.instanceFor(app: clientApp);
   Get.put(CartController());
   runApp(MyApp());
 }
@@ -72,7 +76,8 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
         primaryColor: Colors.blue
       ),
-      home: IndexPages(),
+      initialRoute: AppRoutes.admin,
+      getPages: AppPages.pages,
     );
   }
 }

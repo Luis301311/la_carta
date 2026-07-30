@@ -6,7 +6,7 @@ class ProductController extends GetxController{
   final ProductServices _productServices = ProductServices();
   RxList<Product> products= <Product>[].obs;
   RxList<Product> filteredProducts = <Product>[].obs;
-  RxBool isLoading = false.obs;
+  final RxBool isLoading = false.obs;
   @override
   void onInit() {
     super.onInit();
@@ -28,6 +28,7 @@ class ProductController extends GetxController{
 
 
   Future<void> createProduct(Product product) async {
+     print("Entró a CreateProduct");
     isLoading.value = true;
     try {
       final id = await _productServices.saveProduct(product);
@@ -36,7 +37,8 @@ class ProductController extends GetxController{
       filteredProducts.value = products;
       Get.snackbar('Éxito', 'Producto creado correctamente');
     } catch (e) {
-      print(e.toString());
+      print('Error al crear el producto: $e');
+      Get.snackbar('Error', 'Problemas de sistema ;)');
     } finally {
       isLoading.value = false;
     }

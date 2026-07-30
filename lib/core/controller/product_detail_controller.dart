@@ -42,9 +42,9 @@ class ProductDetailController extends GetxController {
 
     if (totalSelected >= group.maxSelection) return;
 
-    groupMap[option.id] = (groupMap[option.id] ?? 0) + 1;
+    groupMap[option.id!] = (groupMap[option.id] ?? 0) + 1;
 
-    selectedExtras[group.id] = Map.from(groupMap);
+    selectedExtras[group.id!] = Map.from(groupMap);
   }
 
   void decrementExtra(ExtraGroup group, ExtraOption option) {
@@ -56,10 +56,10 @@ class ProductDetailController extends GetxController {
     if (currentQty <= 1) {
       groupMap.remove(option.id);
     } else {
-      groupMap[option.id] = currentQty - 1;
+      groupMap[option.id!] = currentQty - 1;
     }
 
-    selectedExtras[group.id] = Map.from(groupMap);
+    selectedExtras[group.id!] = Map.from(groupMap);
   }
 
   // ===============================

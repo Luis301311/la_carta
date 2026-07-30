@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lacarta/index_pages.dart';
+import 'package:lacarta/features/menu/pages/index_pages.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lacarta/controller/cart_controller.dart';
+import 'package:lacarta/core/controller/cart_controller.dart';
 late FirebaseApp clientApp;
 late FirebaseFirestore clientDb;
 Future<void> main() async {

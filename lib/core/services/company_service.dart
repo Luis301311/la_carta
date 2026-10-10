@@ -1,3 +1,4 @@
+import 'package:lacarta/core/models/company/business_hours.dart';
 import 'package:lacarta/core/models/company/company.dart';
 import 'package:lacarta/core/services/api_client.dart';
 
@@ -15,6 +16,17 @@ class CompanyService {
       String companyId, Map<String, dynamic> fields) async {
     final data = await _api.patch('/companies/$companyId', fields);
     return Company.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  /// PUT /companies/:id/hours — reemplaza el horario completo
+  Future<List<BusinessHours>> setHours(
+      String companyId, List<BusinessHours> hours) async {
+    final data = await _api.put('/companies/$companyId/hours', {
+      'hours': hours.map((h) => h.toJson()).toList(),
+    }) as List;
+    return data
+        .map((e) => BusinessHours.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
   Future<Company> updateCompany(Company company) async {

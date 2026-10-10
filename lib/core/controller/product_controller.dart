@@ -64,6 +64,60 @@ class ProductController extends GetxController {
     }
   }
 
+  /// Panel: guarda los cambios (incluidos los grupos de extras)
+  Future<bool> updateProduct(Product product) async {
+    final companyId = AuthController.to.activeCompanyId.value;
+    if (companyId == null || product.id == null) return false;
+    isLoading.value = true;
+    try {
+      final updated = await _productServices.updateProduct(companyId, product);
+      _replace(updated);
+      Get.snackbar('Guardado', '"${updated.name}" actualizado');
+      return true;
+    } on ApiException catch (e) {
+      Get.snackbar('No se pudo guardar', e.message);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Panel: marcar agotado / disponible en un toque (sin tocar lo demás)
+  Future<void> setAvailability(Product product, bool isAvailable) async {
+    final companyId = AuthController.to.activeCompanyId.value;
+    if (companyId == null || product.id == null) return;
+    // Se cambia en pantalla de una vez y se revierte si la API falla
+    _replace(product.copyWith(isAvailable: isAvailable));
+    try {
+      await _productServices.setAvailability(
+          companyId, product.id!, isAvailable);
+    } on ApiException catch (e) {
+      _replace(product);
+      Get.snackbar('No se pudo cambiar', e.message);
+    }
+  }
+
+  Future<bool> deleteProduct(Product product) async {
+    final companyId = AuthController.to.activeCompanyId.value;
+    if (companyId == null || product.id == null) return false;
+    try {
+      await _productServices.deleteProduct(companyId, product.id!);
+      products.removeWhere((p) => p.id == product.id);
+      filteredProducts.assignAll(products);
+      Get.snackbar('Eliminado', '"${product.name}" se eliminó');
+      return true;
+    } on ApiException catch (e) {
+      Get.snackbar('No se pudo eliminar', e.message);
+      return false;
+    }
+  }
+
+  void _replace(Product product) {
+    final i = products.indexWhere((p) => p.id == product.id);
+    if (i != -1) products[i] = product;
+    filteredProducts.assignAll(products);
+  }
+
   void filteredProductForCategory(String categoryId) {
     if (categoryId.isEmpty) {
       filteredProducts.assignAll(products);

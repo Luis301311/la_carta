@@ -123,6 +123,15 @@ class AuthController extends GetxController {
     Get.offAllNamed(AppRoutes.admin);
   }
 
+  /// Tras renombrar la empresa en "Mi restaurante"
+  Future<void> renameActiveCompany(String name) async {
+    activeCompanyName.value = name;
+    if (isSuperAdmin) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kCompanyName, name);
+    }
+  }
+
   /// Super admin: volver a la lista de empresas
   Future<void> leaveCompany() async {
     activeCompanyId.value = null;

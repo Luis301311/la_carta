@@ -16,6 +16,9 @@ abstract class AppRoutes {
 
   static const users = '/admin/users';
 
+  /// Datos, imágenes, ubicación y horario del restaurante
+  static const restaurant = '/admin/restaurant';
+
   /// Métodos de pago del restaurante
   static const payments = '/admin/payments';
 

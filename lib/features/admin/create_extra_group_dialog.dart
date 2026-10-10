@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lacarta/core/models/product/extra_group.dart';
 
 class CreateExtraGroupDialog extends StatefulWidget {
-  const CreateExtraGroupDialog({super.key});
+  /// Si viene, el diálogo edita ese grupo (y conserva sus opciones)
+  final ExtraGroup? initial;
+  const CreateExtraGroupDialog({super.key, this.initial});
 
   @override
   State<CreateExtraGroupDialog> createState() =>
@@ -21,9 +23,27 @@ class _CreateExtraGroupDialogState
   int maxSelection = 1;
 
   @override
+  void initState() {
+    super.initState();
+    final g = widget.initial;
+    if (g != null) {
+      titleController.text = g.title;
+      isRequired = g.isRequired;
+      minSelection = g.minSelection;
+      maxSelection = g.maxSelection;
+    }
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Nuevo Grupo"),
+      title: Text(widget.initial == null ? "Nuevo Grupo" : "Editar Grupo"),
 
       content: Form(
         key: _formKey,
@@ -119,6 +139,18 @@ class _CreateExtraGroupDialogState
             if (!_formKey.currentState!.validate()) {
               return;
             }
+            // Mismas reglas que valida la API
+            if (maxSelection < 1) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('El máximo debe ser al menos 1')));
+              return;
+            }
+            if (minSelection > maxSelection) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('El mínimo no puede ser mayor que el máximo')));
+              return;
+            }
+            if (isRequired && minSelection < 1) minSelection = 1;
 
             Navigator.pop(
               context,
@@ -127,7 +159,8 @@ class _CreateExtraGroupDialogState
                 isRequired: isRequired,
                 minSelection: minSelection,
                 maxSelection: maxSelection,
-                options: [],
+                // Al editar se conservan las opciones del grupo
+                options: widget.initial?.options.toList() ?? [],
               ),
             );
           },
@@ -137,4 +170,4 @@ class _CreateExtraGroupDialogState
       ],
     );
   }
-}
+}

@@ -11,6 +11,7 @@ import { buildDataSourceOptions } from './database/data-source-options';
 import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
 import { PublicModule } from './public/public.module';
+import { StatsModule } from './stats/stats.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
 
@@ -26,6 +27,7 @@ import { UsersModule } from './users/users.module';
     OrdersModule,
     PublicModule,
     UploadsModule,
+    StatsModule,
   ],
   providers: [
     // Orden: primero valida el token, luego el rol

@@ -22,7 +22,11 @@ class LocationPage extends StatelessWidget {
 
       return ResponsiveCenter(
         padding: const EdgeInsets.all(16),
-        child: ListView(
+        // SingleChildScrollView (no ListView): ListView destruye y recrea
+        // lo que sale de pantalla, y eso rompe el mapa
+        child: SingleChildScrollView(
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
 
           //  MAPA (solo si el restaurante tiene coordenadas)
@@ -149,7 +153,7 @@ class LocationPage extends StatelessWidget {
             ),
           ),
         ],
-      ));
+      )));
     });
   }
 }

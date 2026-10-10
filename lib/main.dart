@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lacarta/app_pages.dart';
 import 'package:lacarta/config/api_config.dart';
 import 'package:lacarta/config/app_routes.dart';
@@ -58,10 +58,8 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: "La Carta",
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        primaryColor: Colors.blue,
-      ),
+      // Paleta de La Carta (coral, crema, carbón, verde) con Poppins
+      theme: AppTheme.light(),
       initialRoute: AppRoutes.menu,
       getPages: AppPages.pages,
     );

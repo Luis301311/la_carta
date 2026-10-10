@@ -11,6 +11,33 @@ class Fmt {
     return '${value < 0 ? '-' : ''}\$$buf';
   }
 
+  /// 48000 -> "$48k", 1250000 -> "$1,3M" (para ejes de gráficas)
+  static String moneyShort(num value) {
+    final v = value.abs();
+    if (v >= 1000000) {
+      final m = (v / 1000000);
+      return '\$${m.toStringAsFixed(m >= 10 ? 0 : 1).replaceAll('.', ',')}M';
+    }
+    if (v >= 1000) return '\$${(v / 1000).round()}k';
+    return '\$${v.round()}';
+  }
+
+  static const _months = [
+    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+    'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+  ];
+  static const _days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+  /// "10 de oct. 2026"
+  static String dateLong(DateTime d) =>
+      '${d.day} de ${_months[d.month - 1]}. ${d.year}';
+
+  /// "Lun", "Mar"...
+  static String weekdayShort(DateTime d) => _days[d.weekday - 1];
+
+  /// "6/10"
+  static String dayMonth(DateTime d) => '${d.day}/${d.month}';
+
   static String _two(int n) => n.toString().padLeft(2, '0');
 
   /// Hora local "14:05"; si no es de hoy, "09/10 14:05"

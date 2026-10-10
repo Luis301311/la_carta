@@ -1,4 +1,5 @@
 import 'package:lacarta/core/models/admin_order.dart';
+import 'package:lacarta/core/models/dashboard.dart';
 import 'package:lacarta/core/services/api_client.dart';
 
 /// Pedidos desde el panel (requiere sesión)
@@ -27,6 +28,12 @@ class AdminOrderService {
   Future<String> lastChange(String companyId) async {
     final data = await _api.get('/companies/$companyId/orders/last-change');
     return (data as Map)['version']?.toString() ?? '';
+  }
+
+  /// Resumen del inicio del panel
+  Future<DashboardData> dashboard(String companyId) async {
+    final data = await _api.get('/companies/$companyId/dashboard');
+    return DashboardData.fromJson(Map<String, dynamic>.from(data));
   }
 
   Future<AdminOrder> updateStatus(

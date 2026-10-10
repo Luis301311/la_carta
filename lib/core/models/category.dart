@@ -17,6 +17,22 @@ class ProductCategory {
     this.createdAt,
   });
 
+  ProductCategory copyWith({
+    String? name,
+    String? description,
+    int? sortOrder,
+    bool? isActive,
+  }) =>
+      ProductCategory(
+        id: id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        imageUrl: imageUrl,
+        sortOrder: sortOrder ?? this.sortOrder,
+        isActive: isActive ?? this.isActive,
+        createdAt: createdAt,
+      );
+
   /// API → Modelo
   factory ProductCategory.fromJson(Map<String, dynamic> json) {
     return ProductCategory(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/controller/auth_controller.dart';
@@ -46,7 +47,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CustomColorBasic.white3,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -141,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: 48,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: CustomColorBasic.blue1,
+                              backgroundColor: AppColors.carbon,
                               foregroundColor: CustomColorBasic.white1,
                             ),
                             onPressed: loading ? null : _submit,

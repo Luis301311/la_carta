@@ -61,6 +61,69 @@ class CategoryController extends GetxController {
     }
   }
 
+  /// Panel: guardar nombre, descripción, orden o estado
+  Future<bool> updateCategory(ProductCategory category,
+      {bool showMessage = true}) async {
+    final companyId = AuthController.to.activeCompanyId.value;
+    if (companyId == null) return false;
+    try {
+      final updated =
+          await _categoryServices.updateCategory(companyId, category);
+      final i = categories.indexWhere((c) => c.id == updated.id);
+      if (i != -1) categories[i] = updated;
+      filteredCategories.assignAll(categories);
+      if (showMessage) Get.snackbar('Guardado', '"${updated.name}" actualizada');
+      return true;
+    } on ApiException catch (e) {
+      Get.snackbar('No se pudo guardar', e.message);
+      return false;
+    }
+  }
+
+  /// Panel: eliminar (la API no deja si todavía tiene productos)
+  Future<bool> deleteCategory(ProductCategory category) async {
+    final companyId = AuthController.to.activeCompanyId.value;
+    if (companyId == null) return false;
+    try {
+      await _categoryServices.deleteCategory(companyId, category.id);
+      categories.removeWhere((c) => c.id == category.id);
+      filteredCategories.assignAll(categories);
+      Get.snackbar('Eliminada', '"${category.name}" se eliminó');
+      return true;
+    } on ApiException catch (e) {
+      // Ej.: "La categoría tiene 3 producto(s). Muévelos o elimínalos primero..."
+      Get.snackbar('No se pudo eliminar', e.message,
+          duration: const Duration(seconds: 5));
+      return false;
+    }
+  }
+
+  /// Panel: arrastrar para reordenar. Se guarda el nuevo orden de las que cambiaron.
+  Future<void> reorder(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex--; // así lo entrega ReorderableListView
+    final list = categories.toList();
+    final moved = list.removeAt(oldIndex);
+    list.insert(newIndex, moved);
+
+    final changed = <ProductCategory>[];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].sortOrder != i) {
+        list[i] = list[i].copyWith(sortOrder: i);
+        changed.add(list[i]);
+      }
+    }
+    categories.assignAll(list);
+    filteredCategories.assignAll(list);
+
+    for (final c in changed) {
+      final ok = await updateCategory(c, showMessage: false);
+      if (!ok) {
+        await fetchCategories(); // vuelve al orden real si algo falló
+        return;
+      }
+    }
+  }
+
   void filterCategory(String query) {
     if (query.isEmpty) {
       filteredCategories.assignAll(categories);

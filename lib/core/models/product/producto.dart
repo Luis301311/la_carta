@@ -25,6 +25,17 @@ class Product {
     this.isAvailable = true,
   });
 
+  Product copyWith({bool? isAvailable}) => Product(
+        id: id,
+        name: name,
+        description: description,
+        basePrice: basePrice,
+        categoryId: categoryId,
+        imageUrl: imageUrl,
+        extras: extras,
+        isAvailable: isAvailable ?? this.isAvailable,
+      );
+
   /// Primera imagen o null si el producto no tiene fotos
   String? get mainImage => imageUrl.isNotEmpty ? imageUrl.first : null;
 

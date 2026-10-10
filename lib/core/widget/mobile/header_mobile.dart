@@ -24,9 +24,25 @@ class HeaderMobile extends StatelessWidget {
         final logoSize = (w * 0.4).clamp(110.0, 180.0);
         final nameSize = (w * 0.055).clamp(18.0, 26.0);
 
+        // Portada (si el restaurante subió una): de fondo y aclarada para
+        // que el nombre y el logo se sigan leyendo bien
+        final cover = companyController.company.value?.coverUrl;
+
         return Container(
           width: double.infinity,
-          color: CustomColorBasic.white1,
+          decoration: BoxDecoration(
+            color: CustomColorBasic.white1,
+            image: cover == null
+                ? null
+                : DecorationImage(
+                    image: NetworkImage(cover),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.white.withValues(alpha: 0.55),
+                      BlendMode.srcATop,
+                    ),
+                  ),
+          ),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,

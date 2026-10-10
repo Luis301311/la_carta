@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
@@ -124,8 +125,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CustomColorBasic.white3,
-      appBar: AppBar(title: const Text('Métodos de pago')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text('Métodos de pago')),
       body: ResponsiveCenter(
         maxWidth: 640,
         child: _loading
@@ -282,7 +284,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
                           height: 48,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: CustomColorBasic.blue1,
+                              backgroundColor: AppColors.carbon,
                               foregroundColor: CustomColorBasic.white1,
                             ),
                             onPressed: _saving ? null : _save,

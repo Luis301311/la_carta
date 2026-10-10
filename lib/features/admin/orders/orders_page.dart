@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/constant/order_status.dart';
 import 'package:lacarta/core/controller/auth_controller.dart';
@@ -20,8 +21,8 @@ class OrdersPage extends StatelessWidget {
     final c = Get.put(AdminOrdersController());
 
     return Scaffold(
-      backgroundColor: CustomColorBasic.white3,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             const Text('Pedidos'),
@@ -33,7 +34,7 @@ class OrdersPage extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (live ? Colors.green : Colors.red)
+                  color: (live ? Colors.green : AppColors.danger)
                       .withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -41,7 +42,7 @@ class OrdersPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.circle,
-                        size: 8, color: live ? Colors.green : Colors.red),
+                        size: 8, color: live ? Colors.green : AppColors.danger),
                     const SizedBox(width: 4),
                     Text(
                       live ? 'En vivo' : 'Sin conexión',
@@ -199,10 +200,9 @@ class _OrderCard extends StatelessWidget {
           titlePadding: EdgeInsets.zero,
           title: Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(28)),
+            decoration: const BoxDecoration(
+              color: AppColors.gray,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
             child: Column(
               children: [
@@ -210,7 +210,7 @@ class _OrderCard extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.w900,
-                        color: color)),
+                        color: AppColors.carbon)),
                 Text(order.customerName,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -238,7 +238,7 @@ class _OrderCard extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.only(top: 6),
                     child: Text('Esta acción no se puede deshacer.',
-                        style: TextStyle(color: Colors.red)),
+                        style: TextStyle(color: AppColors.danger)),
                   ),
                 const SizedBox(height: 10),
                 ...order.items.map((i) => Text(
@@ -254,6 +254,7 @@ class _OrderCard extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
                     value: notify,
+                    activeColor: AppColors.green,
                     onChanged: (v) => setState(() => notify = v ?? false),
                     title: const Text('Avisar al cliente por WhatsApp'),
                   )
@@ -269,7 +270,11 @@ class _OrderCard extends StatelessWidget {
               child: const Text('No'),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: color),
+              style: FilledButton.styleFrom(
+                backgroundColor: status == OrderStatus.cancelled
+                    ? AppColors.danger
+                    : AppColors.green,
+              ),
               onPressed: () {
                 // WhatsApp se abre en este mismo toque (si se abriera después
                 // de esperar a la API, el navegador bloquearía la ventana)
@@ -356,7 +361,6 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = OrderStatus.color(order.status);
     final next = OrderStatus.next(order.status);
     final previous = OrderStatus.previous(order.status);
     final canCancel = OrderStatus.canCancel(order.status);
@@ -364,24 +368,31 @@ class _OrderCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
+      color: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black26,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: color.withValues(alpha: 0.6), width: 1.5),
+        side: const BorderSide(color: Color(0xFFD5D8DD)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ENCABEZADO GRANDE: número + cliente (+ mesa), del color del estado.
-          // Es lo primero que se ve para no confundir pedidos.
+          // ENCABEZADO GRANDE: número + cliente (+ mesa). Es lo primero que se
+          // ve para no confundir pedidos. Sin fondos de color: en momentos de
+          // mucho trabajo la pantalla debe ser tranquila; el estado lo indica
+          // solo el punto de color de la etiqueta.
           Container(
-            color: color.withValues(alpha: 0.12),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
             padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
             child: Row(
               children: [
                 Text(
                   '#${order.orderNumber}',
                   style: TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.w900, color: color),
+                      fontSize: 30, fontWeight: FontWeight.w900, color: AppColors.carbon),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -509,7 +520,7 @@ class _OrderCard extends StatelessWidget {
                                 style: const TextStyle(
                                     fontSize: 13,
                                     fontStyle: FontStyle.italic,
-                                    color: Colors.deepOrange),
+                                    color: Colors.black87),
                               ),
                             ),
                         ],
@@ -522,7 +533,7 @@ class _OrderCard extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.amber.shade50,
+                      color: AppColors.gray,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text('Nota: ${order.notes}',
@@ -556,7 +567,7 @@ class _OrderCard extends StatelessWidget {
                     margin: const EdgeInsets.only(top: 4, bottom: 6),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: AppColors.gray,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -587,7 +598,7 @@ class _OrderCard extends StatelessWidget {
                         if (canCancel)
                           TextButton(
                             style: TextButton.styleFrom(
-                                foregroundColor: Colors.red),
+                                foregroundColor: AppColors.danger),
                             onPressed: busy
                                 ? null
                                 : () => _confirmChange(OrderStatus.cancelled),
@@ -602,8 +613,9 @@ class _OrderCard extends StatelessWidget {
                         ),
                         if (next != null)
                           FilledButton.icon(
+                            // Verde = avanzar. El rojo queda solo para cancelar.
                             style: FilledButton.styleFrom(
-                                backgroundColor: OrderStatus.color(next)),
+                                backgroundColor: AppColors.green),
                             onPressed:
                                 busy ? null : () => _confirmChange(next),
                             icon: busy
@@ -643,13 +655,22 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: AppColors.gray,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        OrderStatus.label(status),
-        style: TextStyle(
-            color: color, fontWeight: FontWeight.w600, fontSize: 12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, size: 8, color: color),
+          const SizedBox(width: 6),
+          Text(
+            OrderStatus.label(status),
+            style: const TextStyle(
+                color: AppColors.carbon,
+                fontWeight: FontWeight.w600,
+                fontSize: 12),
+          ),
+        ],
       ),
     );
   }

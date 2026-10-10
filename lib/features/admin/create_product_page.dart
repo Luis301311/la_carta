@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
-import 'package:lacarta/core/constant/list_producto.dart';
 import 'package:lacarta/core/controller/category_controller.dart';
 import 'package:lacarta/core/controller/product_controller.dart';
 import 'package:lacarta/core/models/product/extra_group.dart';
@@ -13,6 +12,8 @@ import 'package:lacarta/core/services/storade_service.dart';
 import 'package:lacarta/core/widget/admin/app_floating_button.dart';
 import 'package:lacarta/features/admin/create_extra_group_dialog.dart';
 import 'package:lacarta/features/admin/create_extra_option_dialog.dart';
+import 'package:lacarta/config/session.dart';
+import 'package:lacarta/core/services/api_client.dart';
 class CreateProductPage extends StatefulWidget {
   const CreateProductPage({super.key});
 
@@ -50,7 +51,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
           textColor: Colors.white,
           tooltip: "Guardar producto",
           onPressed: saveProduct,
-          isLoading: productController.isLoading.value,
+          isLoading: _productController.isLoading.value,
         ),
       ),
       body: SingleChildScrollView(
@@ -496,12 +497,23 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
 
   void saveProduct() async {
-    List<String> imageUrls = [];
+    final companyId = Session.companyId;
+    if (companyId == null) {
+      Get.snackbar('Error', 'No hay restaurante seleccionado');
+      return;
+    }
 
-    for (final image in images) {
-      imageUrls.add(
-        await storageService.uploadProductImage(image),
-      );
+    List<String> imageUrls = [];
+    try {
+      for (final image in images) {
+        imageUrls.add(
+          await storageService.uploadProductImage(image, companyId),
+        );
+      }
+    } on ApiException catch (e) {
+      // Sin sesión de admin la API responde 401 (el login es el siguiente paso)
+      Get.snackbar('No se pudieron subir las imágenes', e.message);
+      return;
     }
 
      Product newProduct = Product(
@@ -515,4 +527,4 @@ class _CreateProductPageState extends State<CreateProductPage> {
     );
     _productController.createProduct(newProduct);
   }
-}
+}

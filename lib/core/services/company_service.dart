@@ -1,62 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lacarta/main.dart';
 import 'package:lacarta/core/models/company/company.dart';
+import 'package:lacarta/core/services/api_client.dart';
 
+/// Datos de la empresa desde el panel (requiere sesión)
 class CompanyService {
-  final FirebaseFirestore _firestore = clientDb;
-  final String collection = 'company';
-  
-  Future<List<Company>> getCompanies() async {
-    try {
-      final snapshot = await _firestore.collection(collection).get();
+  final ApiClient _api = ApiClient.instance;
 
-      return snapshot.docs.map((doc) {
-        return Company.fromMap(doc.data(), doc.id);
-      }).toList();
-    } catch (e) {
-      throw Exception("Error fetching companies: $e");
-    }
+  Future<Company> getCompany(String companyId) async {
+    final data = await _api.get('/companies/$companyId');
+    return Company.fromJson(Map<String, dynamic>.from(data));
   }
 
-  Future<Company?> getCompanyById(String id) async {
-    try {
-      final doc = await _firestore.collection(collection).doc(id).get();
-
-      if (!doc.exists) return null;
-
-      return Company.fromMap(doc.data()!, doc.id);
-    } catch (e) {
-      throw Exception("Error fetching company: $e");
-    }
+  Future<Company> updateCompany(Company company) async {
+    final data = await _api.patch('/companies/${company.id}', company.toJson());
+    return Company.fromJson(Map<String, dynamic>.from(data));
   }
-
-  /// 🔹 CREATE
-  Future<void> createCompany(Company company) async {
-    try {
-      await _firestore
-          .collection(collection)
-          .doc(company.id)
-          .set(company.toMap());
-    } catch (e) {
-      throw Exception("Error creating company: $e");
-    }
-  }
-
-  /// 🔹 UPDATE
-  Future<void> updateCompany(Company company) async {
-    try {
-      await _firestore
-          .collection(collection)
-          .doc(company.id)
-          .set(
-            company.toMap(),
-            SetOptions(merge: true),
-          );
-    } catch (e) {
-      throw Exception("Error updating company: $e");
-    }
-  }
-
-
 }
-

@@ -15,14 +15,11 @@ class CartExtra {
 
   double get total => price * quantity;
 
-  Map<String, dynamic> toMap() {
+  /// Para el pedido: solo id y cantidad (el precio lo pone la API)
+  Map<String, dynamic> toJson() {
     return {
-      'groupId': groupId,
       'optionId': optionId,
-      'optionName': optionName,
-      'price': price,
       'quantity': quantity,
-      'total': total,
     };
   }
 }

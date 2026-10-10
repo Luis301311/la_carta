@@ -10,7 +10,7 @@ class LocationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<CompanyController>();
+    final controller = Get.find<RestaurantController>();
     
     return Obx(() {
       final company = controller.company.value;
@@ -22,7 +22,8 @@ class LocationPage extends StatelessWidget {
       return ListView(
         children: [
 
-          //  MAPA
+          //  MAPA (solo si el restaurante tiene coordenadas)
+          if (company.location.hasCoordinates)
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
             child: SizedBox(
@@ -30,8 +31,8 @@ class LocationPage extends StatelessWidget {
               child: FlutterMap(
                 options: MapOptions(
                   initialCenter: LatLng(
-                    company.location.lat,
-                    company.location.lng,
+                    company.location.lat!,
+                    company.location.lng!,
                   ),
                   initialZoom: 15,
                 ),
@@ -44,8 +45,8 @@ class LocationPage extends StatelessWidget {
                     markers: [
                       Marker(
                         point: LatLng(
-                          company.location.lat,
-                          company.location.lng,
+                          company.location.lat!,
+                          company.location.lng!,
                         ),
                         width: 40,
                         height: 40,
@@ -69,7 +70,12 @@ class LocationPage extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 25,
-                backgroundImage: NetworkImage(company.logoUrl),
+                backgroundImage: company.logoUrl.isNotEmpty
+                    ? NetworkImage(company.logoUrl)
+                    : null,
+                child: company.logoUrl.isEmpty
+                    ? const Icon(Icons.storefront)
+                    : null,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -118,8 +124,12 @@ class LocationPage extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {
+                // Con coordenadas abre el punto exacto; si no, busca la dirección
+                final query = company.location.hasCoordinates
+                    ? "${company.location.lat},${company.location.lng}"
+                    : Uri.encodeComponent(company.location.address);
                 final url =
-                    "https://www.google.com/maps/search/?api=1&query=${company.location.lat},${company.location.lng}";
+                    "https://www.google.com/maps/search/?api=1&query=$query";
                 launchUrl(Uri.parse(url));
               },
               icon: const Icon(Icons.map_sharp, color: CustomColorBasic.white1,),
@@ -138,4 +148,4 @@ class LocationPage extends StatelessWidget {
       );
     });
   }
-}
+}

@@ -4,87 +4,80 @@ import 'package:lacarta/core/models/company/location.dart';
 class Company {
   final String id;
   final String name;
-  final String taxId; // NIT
+  final String slug;
+  final String? taxId; // NIT
   final String phone;
-  final String email;
+  final String? whatsappPhone;
+  final String? email;
 
   final LocationModel location;
   final List<BusinessHours> businessHours;
 
   final String logoUrl;
+  final String? coverUrl;
+  final String? primaryColor;
   final bool isActive;
+
+  /// Calculado por la API al cargar el menú
+  final bool isOpenNow;
 
   Company({
     required this.id,
     required this.name,
-    required this.taxId,
-    required this.phone,
-    required this.email,
+    this.slug = '',
+    this.taxId,
+    this.phone = '',
+    this.whatsappPhone,
+    this.email,
     required this.location,
-    required this.businessHours,
-    required this.logoUrl,
-    required this.isActive,
+    this.businessHours = const [],
+    this.logoUrl = '',
+    this.coverUrl,
+    this.primaryColor,
+    this.isActive = true,
+    this.isOpenNow = true,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) {
     return Company(
       id: json['id'],
-      name: json['name'],
+      name: json['name'] ?? '',
+      slug: json['slug'] ?? '',
       taxId: json['taxId'],
-      phone: json['phone'],
+      phone: json['phone'] ?? '',
+      whatsappPhone: json['whatsappPhone'],
       email: json['email'],
-      location: LocationModel.fromJson(json['location']),
-      businessHours: (json['businessHours'] as List)
-          .map((h) => BusinessHours.fromJson(h))
-          .toList(),
-      logoUrl: json['logoUrl'],
-      isActive: json['isActive'],
+      location: LocationModel(
+        lat: (json['latitude'] as num?)?.toDouble(),
+        lng: (json['longitude'] as num?)?.toDouble(),
+        address: json['address'] ?? '',
+      ),
+      businessHours: ((json['businessHours'] as List?) ?? [])
+          .map((h) => BusinessHours.fromJson(Map<String, dynamic>.from(h)))
+          .toList()
+        ..sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek)),
+      logoUrl: json['logoUrl'] ?? '',
+      coverUrl: json['coverUrl'],
+      primaryColor: json['primaryColor'],
+      isActive: json['isActive'] ?? true,
+      isOpenNow: json['isOpenNow'] ?? true,
     );
   }
 
+  /// Cuerpo para PATCH /companies/:companyId (datos del perfil)
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
-      'taxId': taxId,
-      'phone': phone,
-      'email': email,
-      'location': location.toJson(),
-      'businessHours': businessHours.map((h) => h.toJson()).toList(),
-      'logoUrl': logoUrl,
-      'isActive': isActive,
-    };
-  }
-
-  factory Company.fromMap(Map<String, dynamic> map, String id) {
-    return Company(
-      id: id,
-      name: map['name'],
-      taxId: map['taxId'],
-      phone: map['phone'],
-      email: map['email'],
-      location: LocationModel.fromJson(map['location']),
-       businessHours: map['businessHours'] != null
-        ? (map['businessHours'] as List)
-            .map((e) => BusinessHours.fromJson(e))
-            .toList()
-        : [],
-      logoUrl: map['logoUrl'],
-      isActive: map['isActive'],
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'taxId': taxId,
-      'phone': phone,
-      'email': email,
-      'location': location.toJson(),
-      'businessHours':
-          businessHours.map((e) => e.toJson()).toList(),
-      'logoUrl': logoUrl,
-      'isActive': isActive,
+      if (taxId != null) 'taxId': taxId,
+      if (phone.isNotEmpty) 'phone': phone,
+      if (whatsappPhone != null) 'whatsappPhone': whatsappPhone,
+      if (email != null) 'email': email,
+      if (location.address.isNotEmpty) 'address': location.address,
+      if (location.lat != null) 'latitude': location.lat,
+      if (location.lng != null) 'longitude': location.lng,
+      if (logoUrl.isNotEmpty) 'logoUrl': logoUrl,
+      if (coverUrl != null) 'coverUrl': coverUrl,
+      if (primaryColor != null) 'primaryColor': primaryColor,
     };
   }
 }

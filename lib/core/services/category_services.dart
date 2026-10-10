@@ -1,30 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lacarta/core/models/category.dart';
-import 'package:lacarta/main.dart';
+import 'package:lacarta/core/services/api_client.dart';
 
+/// Categorías desde el panel de administración (requiere sesión)
 class CategoryServices {
-  final FirebaseFirestore _firestore = clientDb;
-  final String collection = 'categories';
+  final ApiClient _api = ApiClient.instance;
 
-  /// SAVE
-  Future<String> saveCategory(ProductCategory category) async {
-    await _firestore
-        .collection(collection)
-        .doc(category.id)
-        .set(category.toMap());
+  String _base(String companyId) => '/companies/$companyId/categories';
 
-    return category.id;
+  Future<List<ProductCategory>> getCategories(String companyId) async {
+    final data = await _api.get(_base(companyId)) as List;
+    return data
+        .map((e) => ProductCategory.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
-  
-  ///GET
-  Future<List<ProductCategory>> getCategories() async {
-    final snapshot = await _firestore
-        .collection(collection)
-        .orderBy('order')
-        .get();
 
-    return snapshot.docs.map((doc) {
-      return ProductCategory.fromMap(doc.data(), doc.id);
-    }).toList();
+  Future<ProductCategory> createCategory(
+      String companyId, ProductCategory category) async {
+    final data = await _api.post(_base(companyId), category.toJson());
+    return ProductCategory.fromJson(Map<String, dynamic>.from(data));
   }
+
+  Future<ProductCategory> updateCategory(
+      String companyId, ProductCategory category) async {
+    final data =
+        await _api.patch('${_base(companyId)}/${category.id}', category.toJson());
+    return ProductCategory.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  Future<void> deleteCategory(String companyId, String id) =>
+      _api.delete('${_base(companyId)}/$id');
 }

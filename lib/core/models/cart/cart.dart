@@ -18,14 +18,13 @@ class CartItem {
 
   double get total => quantity * (product.basePrice + extrasTotal);
 
-  Map<String, dynamic> toMap() {
+  /// Para el pedido: ids y cantidades, nada de precios
+  Map<String, dynamic> toJson() {
     return {
-      'product': product.toMap(),
+      'productId': product.id,
       'quantity': quantity,
-      'extras': extras.map((e) => e.toMap()).toList(),
-      'extrasTotal': extrasTotal,
-      'total': total,
-      'comment':comment,
+      if (comment.trim().isNotEmpty) 'comment': comment.trim(),
+      'extras': extras.map((e) => e.toJson()).toList(),
     };
   }
 }

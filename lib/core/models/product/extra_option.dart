@@ -11,18 +11,18 @@ class ExtraOption {
     this.isActive = true,
   });
 
-  factory ExtraOption.fromMap(Map<String, dynamic> map) {
+  factory ExtraOption.fromJson(Map<String, dynamic> json) {
     return ExtraOption(
-      id: map['id'],
-      name: map['name'],
-      price: (map['price'] as num).toDouble(),
-      isActive: map['isActive'] ?? true,
+      id: json['id'],
+      name: json['name'] ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+      isActive: json['isActive'] ?? true,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  /// Para crear/editar productos en la API (sin id: se regeneran)
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
       'price': price,
       'isActive': isActive,

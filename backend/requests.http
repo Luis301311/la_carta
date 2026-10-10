@@ -1,0 +1,159 @@
+### =====================================================================
+### La Carta API · pruebas rápidas
+### VS Code: instala la extensión "REST Client" y dale "Send Request" a cada bloque.
+### (También puedes probar todo desde Swagger: http://localhost:3000/docs)
+### =====================================================================
+@api = http://localhost:3000
+
+### 1) Login SUPER ADMIN  -> copia accessToken en @superToken
+# @name superLogin
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{ "email": "superadmin@lacarta.app", "password": "CambiaEsto123" }
+
+###
+@superToken = {{superLogin.response.body.accessToken}}
+
+### 2) Super admin: listar empresas (con conteos)
+GET {{api}}/companies
+Authorization: Bearer {{superToken}}
+
+### 3) Super admin: crear empresa + su primer admin
+# @name newCompany
+POST {{api}}/companies
+Authorization: Bearer {{superToken}}
+Content-Type: application/json
+
+{
+  "name": "Pizzería Don Tito",
+  "slug": "don_tito",
+  "whatsappPhone": "573009876543",
+  "address": "Calle 16 # 12-30, Valledupar",
+  "admin": { "email": "admin@dontito.com", "password": "DonTito2026", "fullName": "Tito" }
+}
+
+###
+@titoId = {{newCompany.response.body.company.id}}
+
+### 4) Login ADMIN de Burger House (creado por el seed)
+# @name burgerLogin
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@burgerhouse.com", "password": "Admin12345" }
+
+###
+@burgerToken = {{burgerLogin.response.body.accessToken}}
+@burgerId = {{burgerLogin.response.body.user.companyId}}
+
+### 5) Admin Burger: su menú (categorías)
+GET {{api}}/companies/{{burgerId}}/categories
+Authorization: Bearer {{burgerToken}}
+
+### 6) Admin Burger intenta ver la empresa de Don Tito -> debe dar 403
+GET {{api}}/companies/{{titoId}}/categories
+Authorization: Bearer {{burgerToken}}
+
+### 7) Admin Burger intenta listar todas las empresas -> 403 (solo super admin)
+GET {{api}}/companies
+Authorization: Bearer {{burgerToken}}
+
+### 8) Admin Burger: crear categoría
+# @name newCat
+POST {{api}}/companies/{{burgerId}}/categories
+Authorization: Bearer {{burgerToken}}
+Content-Type: application/json
+
+{ "name": "Perros calientes", "sortOrder": 2 }
+
+### 9) Admin Burger: crear producto con extras
+POST {{api}}/companies/{{burgerId}}/products
+Authorization: Bearer {{burgerToken}}
+Content-Type: application/json
+
+{
+  "name": "Perro especial",
+  "description": "Salchicha americana, papita, queso y salsas",
+  "basePrice": 15000,
+  "categoryId": "{{newCat.response.body.id}}",
+  "extraGroups": [
+    {
+      "title": "Salsas",
+      "isRequired": false,
+      "minSelection": 0,
+      "maxSelection": 3,
+      "options": [
+        { "name": "Piña", "price": 0 },
+        { "name": "Tártara", "price": 0 },
+        { "name": "Queso fundido", "price": 2500 }
+      ]
+    }
+  ]
+}
+
+### 10) Admin Burger: horario (1 = lunes ... 7 = domingo)
+PUT {{api}}/companies/{{burgerId}}/hours
+Authorization: Bearer {{burgerToken}}
+Content-Type: application/json
+
+{
+  "hours": [
+    { "dayOfWeek": 1, "openTime": "11:00", "closeTime": "22:00", "closed": false },
+    { "dayOfWeek": 2, "openTime": "11:00", "closeTime": "22:00", "closed": false },
+    { "dayOfWeek": 3, "openTime": "00:00", "closeTime": "00:00", "closed": true },
+    { "dayOfWeek": 4, "openTime": "11:00", "closeTime": "22:00", "closed": false },
+    { "dayOfWeek": 5, "openTime": "12:00", "closeTime": "02:00", "closed": false },
+    { "dayOfWeek": 6, "openTime": "12:00", "closeTime": "02:00", "closed": false },
+    { "dayOfWeek": 7, "openTime": "12:00", "closeTime": "22:00", "closed": false }
+  ]
+}
+
+### 11) PÚBLICO (sin token): menú completo por slug
+# @name menu
+GET {{api}}/public/burger_house/menu
+
+### 12) PÚBLICO: crear pedido (el servidor calcula precios)
+# Cambia los ids por los que te devolvió el menú (producto "Hamburguesa clásica",
+# opción "Tres cuartos" del grupo obligatorio y "Tocineta" de Adiciones).
+POST {{api}}/public/burger_house/orders
+Content-Type: application/json
+
+{
+  "type": "delivery",
+  "customerName": "Luis",
+  "phone": "3001234567",
+  "address": "Calle 10 # 5-20",
+  "items": [
+    {
+      "productId": "PEGA_AQUI_ID_PRODUCTO",
+      "quantity": 2,
+      "comment": "Sin cebolla",
+      "extras": [
+        { "optionId": "PEGA_AQUI_ID_TRES_CUARTOS" },
+        { "optionId": "PEGA_AQUI_ID_TOCINETA" }
+      ]
+    }
+  ]
+}
+
+### 13) Admin Burger: pedidos pendientes
+GET {{api}}/companies/{{burgerId}}/orders?status=pending
+Authorization: Bearer {{burgerToken}}
+
+### 14) Admin Burger: cambiar estado del pedido
+PATCH {{api}}/companies/{{burgerId}}/orders/PEGA_AQUI_ID_PEDIDO/status
+Authorization: Bearer {{burgerToken}}
+Content-Type: application/json
+
+{ "status": "preparing" }
+
+### 15) Super admin: suspender Don Tito (su menú deja de verse y su admin no puede entrar)
+PATCH {{api}}/companies/{{titoId}}/status
+Authorization: Bearer {{superToken}}
+Content-Type: application/json
+
+{ "isActive": false }
+
+### 16) Público: el menú de una empresa suspendida -> 404
+GET {{api}}/public/don_tito/menu

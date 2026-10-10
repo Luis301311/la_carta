@@ -1,4 +1,4 @@
-import 'package:get/instance_manager.dart';
+/* import 'package:get/instance_manager.dart';
 import 'package:lacarta/core/controller/category_controller.dart';
 import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:lacarta/core/controller/product_controller.dart';
@@ -299,4 +299,4 @@ void  addProductss() {
 
 void addCompany(){
   companyController.createCompany(testCompany);
-}
+} */

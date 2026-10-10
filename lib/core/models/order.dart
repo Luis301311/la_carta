@@ -2,40 +2,66 @@ import 'package:lacarta/core/models/cart/cart.dart';
 
 class OrderCart {
   final List<CartItem> items;
-  final String status;
-  final String type;
-  final DateTime createdAt;
+  final String type; // OrderType.dineIn | takeaway | delivery
 
-  final String? table;        // si come en el sitio
-  final String? customerName; // quien recibe o recoge
-  final String? address;      // si es domicilio
+  final String customerName; // quien recibe, recoge o pide en la mesa
   final String? phone;
+  final String? address; // si es domicilio
+  final String? table; // si come en el sitio
+  final String? notes;
 
   OrderCart({
     required this.items,
-    required this.status,
     required this.type,
-    required this.createdAt,
-    this.table,
-    this.customerName,
-    this.address,
+    required this.customerName,
     this.phone,
+    this.address,
+    this.table,
+    this.notes,
   });
 
-  double get total =>
-      items.fold(0, (sum, item) => sum + item.total);
+  /// Total estimado en el celular. El total real lo calcula la API.
+  double get total => items.fold(0, (sum, item) => sum + item.total);
 
-  Map<String, dynamic> toMap() {
+  /// Cuerpo para POST /public/:slug/orders.
+  /// No se envían precios: la API los toma de la base de datos.
+  Map<String, dynamic> toJson() {
+    String? clean(String? v) =>
+        (v == null || v.trim().isEmpty) ? null : v.trim();
+
     return {
-      'items': items.map((e) => e.toMap()).toList(),
-      'status': status,
       'type': type,
-      'total': total,
-      'createdAt': createdAt,
-      'table': table,
-      'customerName': customerName,
-      'address': address,
-      'phone': phone,
+      'customerName': customerName.trim(),
+      if (clean(phone) != null) 'phone': clean(phone),
+      if (clean(address) != null) 'address': clean(address),
+      if (clean(table) != null) 'tableNumber': clean(table),
+      if (clean(notes) != null) 'notes': clean(notes),
+      'items': items.map((e) => e.toJson()).toList(),
     };
+  }
+}
+
+/// Lo que devuelve la API al crear el pedido
+class OrderResult {
+  final String id;
+  final int orderNumber;
+  final double total;
+  final String? whatsappUrl;
+
+  OrderResult({
+    required this.id,
+    required this.orderNumber,
+    required this.total,
+    this.whatsappUrl,
+  });
+
+  factory OrderResult.fromJson(Map<String, dynamic> json) {
+    final order = Map<String, dynamic>.from(json['order']);
+    return OrderResult(
+      id: order['id'],
+      orderNumber: (order['orderNumber'] as num).toInt(),
+      total: (order['total'] as num).toDouble(),
+      whatsappUrl: json['whatsappUrl'],
+    );
   }
 }

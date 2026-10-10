@@ -1,33 +1,22 @@
 import 'dart:typed_data';
-import 'package:lacarta/main.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
+import 'package:lacarta/core/services/api_client.dart';
+
+/// Sube imágenes a la API: POST /companies/:companyId/uploads/image
+/// (la API las guarda en una carpeta por empresa y devuelve la URL pública)
 class StorageService {
-  final storage = FirebaseStorage.instanceFor(app: clientApp);
+  final ApiClient _api = ApiClient.instance;
 
-  Future<String> uploadProductImage(Uint8List bytes) async {
-    try {
-      
-      final ref = storage.ref(
-        'products/${DateTime.now().millisecondsSinceEpoch}.jpg',
-      );
-
-      final task = await ref.putData(
-        bytes,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-
-      print("Estado: ${task.state}");
-
-      final url = await ref.getDownloadURL();
-      print("URL: $url");
-
-      return url;
-    } catch (e, s) {
-      print("ERROR STORAGE:");
-      print(e);
-      print(s);
-      rethrow;
-    }
+  Future<String> uploadProductImage(
+    Uint8List bytes,
+    String companyId, {
+    String filename = 'producto.jpg',
+  }) async {
+    final data = await _api.uploadImage(
+      '/companies/$companyId/uploads/image',
+      bytes,
+      filename: filename,
+    );
+    return (data as Map)['url'] as String;
   }
 }

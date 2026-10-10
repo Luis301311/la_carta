@@ -7,8 +7,12 @@ import 'package:lacarta/core/models/product/extra_option.dart';
 import 'package:lacarta/core/models/product/producto.dart';
 
 class ProductDetailController extends GetxController {
+  // Antes: Get.put(CartController()) — esto REEMPLAZABA la instancia
+  // que ya existe desde main.dart cada vez que se abría esta pantalla,
+  // con riesgo de perder el carrito. Ahora usamos Get.find() para
+  // obtener la misma instancia que ya está registrada.
+  final CartController _cartController = Get.find<CartController>();
 
-  final CartController _cartController = Get.put((CartController()));
   final Product product;
   final currentPage = 0.obs;
   ProductDetailController(this.product);
@@ -16,7 +20,7 @@ class ProductDetailController extends GetxController {
   var quantity = 1.obs;
   var comment = "".obs;
   // groupId -> { optionId : cantidad }
-  RxMap<String, Map<String, int>> selectedExtras =<String, Map<String, int>>{}.obs;
+  RxMap<String, Map<String, int>> selectedExtras = <String, Map<String, int>>{}.obs;
 
   void increase() => quantity++;
 
@@ -37,8 +41,7 @@ class ProductDetailController extends GetxController {
   void incrementExtra(ExtraGroup group, ExtraOption option) {
     final groupMap = selectedExtras[group.id] ?? {};
 
-    final totalSelected =
-        groupMap.values.fold(0, (sum, qty) => sum + qty);
+    final totalSelected = groupMap.values.fold(0, (sum, qty) => sum + qty);
 
     if (totalSelected >= group.maxSelection) return;
 
@@ -70,8 +73,7 @@ class ProductDetailController extends GetxController {
     for (var group in product.extras) {
       if (group.isRequired) {
         final groupMap = selectedExtras[group.id] ?? {};
-        final totalSelected =
-            groupMap.values.fold(0, (sum, qty) => sum + qty);
+        final totalSelected = groupMap.values.fold(0, (sum, qty) => sum + qty);
 
         if (totalSelected < group.minSelection) {
           Get.snackbar(
@@ -93,14 +95,10 @@ class ProductDetailController extends GetxController {
     double sum = 0;
 
     selectedExtras.forEach((groupId, optionsMap) {
-
-      final group = product.extras
-          .firstWhere((g) => g.id == groupId);
+      final group = product.extras.firstWhere((g) => g.id == groupId);
 
       optionsMap.forEach((optionId, quantity) {
-
-        final option = group.options
-            .firstWhere((o) => o.id == optionId);
+        final option = group.options.firstWhere((o) => o.id == optionId);
 
         sum += option.price * quantity;
       });
@@ -109,24 +107,19 @@ class ProductDetailController extends GetxController {
     return sum;
   }
 
-  double get total =>quantity.value * (product.basePrice + extrasTotal);
+  double get total => quantity.value * (product.basePrice + extrasTotal);
 
   // ===============================
   // CARRITO
   // ===============================
   List<CartExtra> buildCartExtras() {
-
     List<CartExtra> result = [];
 
     selectedExtras.forEach((groupId, optionsMap) {
-
-      final group = product.extras
-          .firstWhere((g) => g.id == groupId);
+      final group = product.extras.firstWhere((g) => g.id == groupId);
 
       optionsMap.forEach((optionId, quantity) {
-
-        final option = group.options
-            .firstWhere((o) => o.id == optionId);
+        final option = group.options.firstWhere((o) => o.id == optionId);
 
         result.add(
           CartExtra(
@@ -143,29 +136,16 @@ class ProductDetailController extends GetxController {
     return result;
   }
 
-
-
-
-
-
-
-
-
-
-
   void addToCart() {
-
     if (!validateRequired()) return;
 
-    final cartController = Get.find<CartController>();
-
-    cartController.addToCart(
+    _cartController.addToCart(
       CartItem(
         product: product,
         quantity: quantity.value,
         extras: buildCartExtras(),
         comment: comment.value,
-      )
+      ),
     );
 
     Get.snackbar(

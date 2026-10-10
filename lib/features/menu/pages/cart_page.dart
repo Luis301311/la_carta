@@ -9,7 +9,7 @@ class CartPage extends StatelessWidget {
   CartPage({super.key});
 
   final CartController cartController = Get.find<CartController>();
-  final OrderController orderController = Get.put(OrderController());
+  final OrderController orderController = Get.find<OrderController>();
 
   @override
   Widget build(BuildContext context) {
@@ -54,21 +54,36 @@ class CartPage extends StatelessWidget {
                             MainAxisAlignment.spaceBetween,
                         children: [
 
-                          /// Nombre y precio
-                          Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.product.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                          /// Nombre, extras, comentario y precio
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.product.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "\$ ${item.total}",
-                              ),
-                            ],
+                                ...item.extras.map((e) => Text(
+                                      "+ ${e.quantity > 1 ? '${e.quantity} x ' : ''}${e.optionName}",
+                                      style: const TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    )),
+                                if (item.comment.trim().isNotEmpty)
+                                  Text(
+                                    item.comment,
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.grey),
+                                  ),
+                                Text(
+                                  "\$ ${item.total.toStringAsFixed(0)}",
+                                ),
+                              ],
+                            ),
                           ),
 
                           /// Cantidad
@@ -165,4 +180,4 @@ class CartPage extends StatelessWidget {
       }),
     );
   }
-}
+}

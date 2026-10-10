@@ -2,23 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/constant/order_status.dart';
-import 'package:lacarta/core/controller/cart_controller.dart';
-import 'package:lacarta/core/controller/order_controller.dart';
-import 'package:lacarta/core/models/order.dart';
-import 'package:lacarta/core/widget/mobile/form/delivery_form.dart';
-import 'package:lacarta/core/widget/mobile/form/takeawuay_form.dart';
+import 'package:lacarta/core/widget/mobile/form/order_form.dart';
 
 class OrderTypeSelector extends StatelessWidget {
   final String selectedType;
   final Function(String) onSelected;
 
-  OrderTypeSelector({
+  const OrderTypeSelector({
     super.key,
     required this.selectedType,
     required this.onSelected,
   });
-  final CartController cartController = Get.find<CartController>();
-  final OrderController orderController = Get.put(OrderController());
 
   Widget _buildOption(
     BuildContext context,
@@ -30,22 +24,13 @@ class OrderTypeSelector extends StatelessWidget {
 
     return Expanded(
       child: GestureDetector(
-        
-        onTap: (){
+        onTap: () {
           onSelected(type);
-          if (type == OrderType.delivery) {
-            Get.bottomSheet(
-              DeliveryForm(),
-              isScrollControlled: true,
-            );
-          }
-          if(type == OrderType.takeaway){
-            Get.bottomSheet(
-              TakeawayForm(),
-              isScrollControlled: true,
-            );
-          }
-        }, 
+          Get.bottomSheet(
+            OrderForm(type: type),
+            isScrollControlled: true,
+          );
+        },
         child: Container(
           height: 130,
           margin: const EdgeInsets.symmetric(horizontal: 6),
@@ -67,10 +52,9 @@ class OrderTypeSelector extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: selected ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12
-                ),
+                    color: selected ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12),
               )
             ],
           ),
@@ -83,9 +67,12 @@ class OrderTypeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildOption(context, OrderType.dineIn, "Consumir aqui", Icons.restaurant),
-        _buildOption(context, OrderType.takeaway, "Para llevar", Icons.shopping_bag),
-        _buildOption(context, OrderType.delivery, "Domicilio", Icons.delivery_dining),
+        _buildOption(
+            context, OrderType.dineIn, "Consumir aqui", Icons.restaurant),
+        _buildOption(
+            context, OrderType.takeaway, "Para llevar", Icons.shopping_bag),
+        _buildOption(
+            context, OrderType.delivery, "Domicilio", Icons.delivery_dining),
       ],
     );
   }

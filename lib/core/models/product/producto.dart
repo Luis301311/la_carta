@@ -6,7 +6,11 @@ class Product {
   final String description;
   final double basePrice;
   final String categoryId;
+
+  /// En la API se llama `imageUrls`
   final List<String> imageUrl;
+
+  /// En la API se llama `extraGroups`
   final List<ExtraGroup> extras;
   final bool isAvailable;
 
@@ -21,35 +25,34 @@ class Product {
     this.isAvailable = true,
   });
 
-  factory Product.fromMap(Map<String, dynamic> map, String id) {
+  /// Primera imagen o null si el producto no tiene fotos
+  String? get mainImage => imageUrl.isNotEmpty ? imageUrl.first : null;
+
+  factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: id,
-      name: map['name'] ?? '',
-      description: map['description'] ?? '',
-      basePrice: (map['basePrice'] ?? 0).toDouble(),
-      categoryId: map['categoryId'] ?? '',
-      imageUrl: map['imageUrl'] != null
-          ? List<String>.from(map['imageUrl'])
-          : [],
-      isAvailable: map['isAvailable'] ?? true,
-      extras: (map['extras'] as List?)
-              ?.map((e) => ExtraGroup.fromMap(
-                    Map<String, dynamic>.from(e),
-                  ))
-              .toList() ??
-          [],
+      id: json['id'],
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      basePrice: (json['basePrice'] as num?)?.toDouble() ?? 0,
+      categoryId: json['categoryId'] ?? '',
+      imageUrl: List<String>.from(json['imageUrls'] ?? const []),
+      isAvailable: json['isAvailable'] ?? true,
+      extras: ((json['extraGroups'] as List?) ?? [])
+          .map((e) => ExtraGroup.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  /// Cuerpo para POST/PATCH /companies/:companyId/products
+  Map<String, dynamic> toJson() {
     return {
       'name': name,
       'description': description,
       'basePrice': basePrice,
       'categoryId': categoryId,
-      'imageUrl': imageUrl,
+      'imageUrls': imageUrl,
       'isAvailable': isAvailable,
-      'extras': extras.map((e) => e.toMap()).toList(),
+      'extraGroups': extras.map((e) => e.toJson()).toList(),
     };
   }
 }

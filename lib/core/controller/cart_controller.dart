@@ -1,15 +1,12 @@
-
 import 'package:get/get.dart';
 import 'package:lacarta/core/models/cart/cart.dart';
 
+/// Solo maneja el carrito. Enviar el pedido es trabajo de OrderController.
 class CartController extends GetxController {
-  RxBool isLoading = false.obs; 
-  var cartItems = <CartItem>[].obs;  //pedido
+  final cartItems = <CartItem>[].obs;
 
   void addToCart(CartItem cartItem) {
-      cartItems.add(
-        cartItem
-      );
+    cartItems.add(cartItem);
   }
 
   void increaseQuantity(CartItem item) {
@@ -30,18 +27,7 @@ class CartController extends GetxController {
     cartItems.clear();
   }
 
-  int get totalItems =>cartItems.fold(0, (sum, item) => sum + item.quantity);
+  int get totalItems => cartItems.fold(0, (sum, item) => sum + item.quantity);
 
-  double get totalCart =>cartItems.fold(0, (sum, item) => sum + (item.total),);
-
-  Future<void>  createCartOrder(List<CartItem> order ) async{
-    isLoading.value = true;
-    try {
-
-    } catch (e) {
-      Get.snackbar('Error', 'No se pudo realizar el pedido');
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  double get totalCart => cartItems.fold(0, (sum, item) => sum + item.total);
 }

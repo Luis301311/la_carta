@@ -9,7 +9,7 @@ class HeaderMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CompanyController companyController = Get.put(CompanyController());
+    final RestaurantController companyController = Get.find<RestaurantController>();
     final screenSize =MediaQuery.of(context).size; 
     final screenWidth = screenSize.width; 
     return Container(
@@ -74,9 +74,15 @@ class HeaderMobile extends StatelessWidget {
                     ClipOval(
                       child: 
                       Obx((){
+                        final logo = companyController.company.value?.logoUrl ?? "";
+                        if (logo.isEmpty) {
+                          return const Icon(Icons.storefront, size: 90, color: Colors.grey);
+                        }
                         return Image.network(
-                          companyController.company.value?.logoUrl ?? "", 
+                          logo,
                           fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.storefront, size: 90, color: Colors.grey),
                         );
                       })
                     )
@@ -141,4 +147,4 @@ class HeaderMobile extends StatelessWidget {
       ),
     );
   }
-}
+}

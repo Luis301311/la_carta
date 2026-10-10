@@ -1,81 +1,66 @@
 import 'package:get/get.dart';
+import 'package:lacarta/config/session.dart';
 import 'package:lacarta/core/constant/order_status.dart';
+import 'package:lacarta/core/controller/cart_controller.dart';
 import 'package:lacarta/core/models/order.dart';
+import 'package:lacarta/core/services/api_client.dart';
+import 'package:lacarta/core/services/order_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class OrderController  extends GetxController{
-  var orderType = "dine_in".obs;
-  
-  //final OrderService _orderService = OrderService();
+class OrderController extends GetxController {
+  final OrderService _orderService = OrderService();
 
-  Future<void> saveOrder(OrderCart order) async{
-    await sendToWhatsApp(order);
-     //await _orderService.saveOrder(order);
+  final orderType = OrderType.dineIn.obs;
+  final isSending = false.obs;
+
+  /// Envía el pedido a la API y abre WhatsApp con el mensaje que arma el servidor.
+  /// Devuelve true si el pedido quedó guardado.
+  Future<bool> sendOrder(OrderCart order) async {
+    if (isSending.value) return false;
+    if (order.items.isEmpty) {
+      Get.snackbar('Pedido vacío', 'Agrega al menos un producto');
+      return false;
+    }
+
+    isSending.value = true;
+    try {
+      final result = await _orderService.createOrder(Session.slug, order);
+
+      Get.find<CartController>().clearCart();
+      _closeBottomSheets();
+
+      Get.snackbar(
+        'Pedido #${result.orderNumber} enviado',
+        'Total: \$${result.total.toStringAsFixed(0)}',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+      );
+
+      final url = result.whatsappUrl;
+      if (url != null) {
+        final launched =
+            await launchUrl(Uri.parse(url), webOnlyWindowName: '_blank');
+        if (!launched) {
+          Get.snackbar('Aviso', 'El pedido se guardó, pero no se pudo abrir WhatsApp');
+        }
+      }
+      return true;
+    } on ApiException catch (e) {
+      // Ej.: "Para domicilio se necesitan dirección y teléfono",
+      // "Hamburguesa clásica: elige al menos 1 en Término de la carne"
+      Get.snackbar('No se pudo enviar el pedido', e.message,
+          duration: const Duration(seconds: 5));
+      return false;
+    } finally {
+      isSending.value = false;
+    }
   }
 
-  Future<void> sendToWhatsApp(OrderCart order) async {
-    final message = buildWhatsAppMessage(order);
-    final phone = "573174210412";
-
-    final url = Uri.parse(
-      "https://wa.me/$phone?text=$message",
-    );
-
-    await launchUrl(
-      url,
-      webOnlyWindowName: "_blank",
-    );
-  }
-
-
-
-
-  String buildWhatsAppMessage(OrderCart order) {
-    String message = "*Nuevo Pedido*\n\n";
-
-    if (order.type == OrderType.delivery) {
-      message += "*Domicilio*\n";
-      message += "Cliente: ${order.customerName}\n";
-      message += "Tel: ${order.phone}\n";
-      message += "Dirección: ${order.address}\n\n";
+  /// Cierra el selector de tipo de pedido y el formulario
+  void _closeBottomSheets() {
+    // Máximo 3 por seguridad (selector + formulario)
+    for (var i = 0; i < 3 && Get.isBottomSheetOpen == true; i++) {
+      Get.back();
     }
-
-    if (order.type == OrderType.takeaway) {
-      message += "*Para recoger*\n";
-      message += "Nombre: ${order.customerName}\n";
-
-      if (order.phone != null && order.phone!.isNotEmpty) {
-        message += "Tel: ${order.phone}\n";
-      }
-
-      message += "\n";
-    }
-
-    if (order.type == OrderType.dineIn) {
-      message += "*Comer en el sitio*\n";
-      message += "Mesa: ${order.table}\n\n";
-    }
-
-    message += "-------------------\n";
-    message += "*Pedido*\n\n";
-
-    for (var item in order.items) {
-      message += "${item.quantity} x ${item.product.name}\n";
-
-      for (var extra in item.extras) {
-        message += "   + ${extra.optionName} x${extra.quantity}\n";
-      }
-
-      if (item.comment.isNotEmpty) {
-        message += "Comentario: ${item.comment}\n";
-      }
-
-      message += "   Subtotal: \$${item.total}\n\n";
-    }
-
-    message += "-------------------\n";
-    message += "*TOTAL: \$${order.total}*\n";
-
-    return Uri.encodeComponent(message);
   }
 }

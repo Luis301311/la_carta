@@ -1,72 +1,46 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lacarta/app_pages.dart';
+import 'package:lacarta/config/api_config.dart';
 import 'package:lacarta/config/app_routes.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:lacarta/config/session.dart';
 import 'package:lacarta/core/controller/cart_controller.dart';
-late FirebaseApp clientApp;
-late FirebaseFirestore clientDb;
-late FirebaseStorage clienteStorage;
-Future<void> main() async {
+import 'package:lacarta/core/controller/company_controller.dart';
+import 'package:lacarta/core/controller/order_controller.dart';
+import 'package:lacarta/core/services/api_client.dart';
+import 'package:lacarta/core/services/menu_service.dart';
 
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase de la plataforma
-  await Firebase.initializeApp(
-    name:"lacarta-platform",
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyAh1tQw9WDKaQ3fPQNxhyjUuaYh1sV6vIQ",
-      appId: "1:913730650705:web:36d7374ca2af469e762e70",
-      messagingSenderId: "913730650705",
-      projectId: "lacarta-platform",
-    ),
-  );
+  // El restaurante sale de la URL: lacarta.app/burger_house
+  // (en desarrollo, sin slug en la URL, se usa ApiConfig.defaultSlug)
+  final segments = Uri.base.pathSegments.where((s) => s.isNotEmpty).toList();
+  Session.slug = segments.isNotEmpty ? segments.first : ApiConfig.defaultSlug;
 
-  FirebaseFirestore platformDb =
-      FirebaseFirestore.instanceFor(app: Firebase.app("lacarta-platform"));
+  try {
+    // Una sola petición trae empresa, horario, categorías y productos
+    final menu = await MenuService().getMenu(Session.slug);
+    Session.companyId = menu.company.id;
 
-  // Obtener slug desde URL
-  final slug = Uri.base.pathSegments.isNotEmpty
-      ? Uri.base.pathSegments.first
-      : "burger_house";
+    Get.put(RestaurantController(menu), permanent: true);
+    Get.put(CartController(), permanent: true);
+    Get.put(OrderController(), permanent: true);
 
-  // Buscar cliente
-  final doc = await platformDb.collection("clients").doc(slug).get();
-
-  final data = doc.data();
-
-  if (data == null) {
-    throw Exception("Cliente no encontrado");
+    runApp(const MyApp());
+  } on ApiException catch (e) {
+    runApp(ErrorApp(
+      message: e.statusCode == 404
+          ? 'No encontramos el restaurante "${Session.slug}".'
+          : e.message,
+    ));
   }
-
-  // Inicializar Firebase del cliente
-  clientApp = await Firebase.initializeApp(
-    name: "LaCarta-1",
-    options: FirebaseOptions(
-      apiKey: data["apiKey"],
-      appId: data["appId"],
-      messagingSenderId: data["messagingSenderId"],
-      projectId: data["projectId"],
-    ),
-  );
-
-  clientDb = FirebaseFirestore.instanceFor(app: clientApp);
-  clienteStorage = FirebaseStorage.instanceFor(app: clientApp);
-  Get.put(CartController());
-  runApp(MyApp());
 }
-
-
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -74,11 +48,42 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
-        primaryColor: Colors.blue
+        primaryColor: Colors.blue,
       ),
-      initialRoute: AppRoutes.admin,
+      initialRoute: AppRoutes.menu,
       getPages: AppPages.pages,
     );
   }
 }
 
+/// Pantalla cuando el menú no se pudo cargar (slug inválido, API apagada...)
+class ErrorApp extends StatelessWidget {
+  final String message;
+  const ErrorApp({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.storefront, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

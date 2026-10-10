@@ -12,8 +12,13 @@ class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({super.key, required this.product});
   @override
   Widget build(BuildContext context) {
-    final ProductDetailController productoController = Get.put(ProductDetailController(product));
-    final OrderController orderController = Get.put(OrderController());
+    // Un controlador por producto (tag): antes se reutilizaba el del primer
+    // producto abierto y se mezclaban extras entre productos.
+    final ProductDetailController productoController = Get.put(
+      ProductDetailController(product),
+      tag: product.id ?? product.name,
+    );
+    final OrderController orderController = Get.find<OrderController>();
     return Scaffold(
       backgroundColor: CustomColorBasic.white1,
       body: SafeArea(
@@ -70,7 +75,12 @@ class ProductDetailPage extends StatelessWidget {
                           SizedBox(
                             height: 300,
                             width: double.infinity,
-                            child: PageView.builder(
+                            child: product.imageUrl.isEmpty
+                              ? Container(
+                                  color: CustomColorBasic.white3,
+                                  child: const Icon(Icons.fastfood, size: 80, color: Colors.grey),
+                                )
+                              : PageView.builder(
                               itemCount: product.imageUrl.length,
                               onPageChanged: (index) {
                                 productoController.currentPage.value = index;
@@ -79,6 +89,8 @@ class ProductDetailPage extends StatelessWidget {
                                 return Image.network(
                                   product.imageUrl[index],
                                   fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.broken_image, size: 60, color: Colors.grey),
                                 );
                               },
                             ),
@@ -167,7 +179,7 @@ class ProductDetailPage extends StatelessWidget {
                                     return ListTile(
                                       title: Text(option.name),
                                       subtitle: option.price > 0
-                                          ? Text("+ \$${option.price}")
+                                          ? Text("+ \$${option.price.toStringAsFixed(0)}")
                                           : null,
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -348,4 +360,4 @@ class ProductDetailPage extends StatelessWidget {
       ),
     );
   }
-}
+}

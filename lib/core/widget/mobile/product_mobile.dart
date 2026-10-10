@@ -48,15 +48,20 @@ class ProductMobile extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      height: 90,
-                      width: 90,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        image: DecorationImage(
-                          image: NetworkImage(producto.imageUrl[0].toString()),
-                          fit: BoxFit.cover,
-                        ),
+                    // Foto (o un ícono si el producto no tiene)
+                    ClipOval(
+                      child: Container(
+                        height: 90,
+                        width: 90,
+                        color: CustomColorBasic.white4,
+                        child: producto.mainImage == null
+                            ? const Icon(Icons.fastfood, color: Colors.grey)
+                            : Image.network(
+                                producto.mainImage!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.fastfood, color: Colors.grey),
+                              ),
                       ),
                     ),
                     const SizedBox(width: 25),
@@ -74,6 +79,8 @@ class ProductMobile extends StatelessWidget {
                           ),
                           Text(
                             producto.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: descSize,
                               fontWeight: FontWeight.w300,
@@ -95,4 +102,4 @@ class ProductMobile extends StatelessWidget {
       ),
     );
   }
-}
+}

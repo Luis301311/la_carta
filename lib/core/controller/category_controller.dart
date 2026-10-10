@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
+import 'package:lacarta/config/session.dart';
+import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:lacarta/core/models/category.dart';
+import 'package:lacarta/core/services/api_client.dart';
 import 'package:lacarta/core/services/category_services.dart';
 
 class CategoryController extends GetxController {
-
   final CategoryServices _categoryServices = CategoryServices();
   RxList<ProductCategory> categories = <ProductCategory>[].obs;
   RxList<ProductCategory> filteredCategories = <ProductCategory>[].obs;
@@ -15,45 +17,51 @@ class CategoryController extends GetxController {
     fetchCategories();
   }
 
-  /// 🔹 Obtener categorías
-  void fetchCategories() async {
+  /// Cliente: categorías del menú público. Admin: todas desde la API.
+  Future<void> fetchCategories() async {
     isLoading.value = true;
     try {
-      categories.value = await _categoryServices.getCategories();
-      filteredCategories.value = categories;
-    } catch (e) {
-      Get.snackbar('Error', 'No se pudieron cargar las categorías');
+      if (Session.isLoggedIn && Session.companyId != null) {
+        categories.assignAll(
+            await _categoryServices.getCategories(Session.companyId!));
+      } else {
+        categories.assignAll(Get.find<RestaurantController>().categories);
+      }
+      filteredCategories.assignAll(categories);
+    } on ApiException catch (e) {
+      Get.snackbar('Error', e.message);
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// 🔹 Crear categoría
-  Future<void> createCategory(ProductCategory category) async {
+  /// Panel: crear categoría
+  Future<bool> createCategory(ProductCategory category) async {
+    final companyId = Session.companyId;
+    if (companyId == null) return false;
     isLoading.value = true;
     try {
-      await _categoryServices.saveCategory(category);
-      
-      categories.add(category);
-      filteredCategories.value = categories;
+      final created =
+          await _categoryServices.createCategory(companyId, category);
+      categories.add(created);
+      filteredCategories.assignAll(categories);
       Get.snackbar('Éxito', 'Categoría creada correctamente');
-    } catch (e) {
-      Get.snackbar('Error', 'No se pudo crear la categoría');
+      return true;
+    } on ApiException catch (e) {
+      Get.snackbar('No se pudo crear la categoría', e.message);
+      return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// 🔹 Filtrar categorías
   void filterCategory(String query) {
     if (query.isEmpty) {
-      filteredCategories.value = categories;
+      filteredCategories.assignAll(categories);
     } else {
-      filteredCategories.value = categories.where((category) {
-        return category.name
-            .toLowerCase()
-            .contains(query.toLowerCase());
-      }).toList();
+      final q = query.toLowerCase();
+      filteredCategories
+          .assignAll(categories.where((c) => c.name.toLowerCase().contains(q)));
     }
   }
 }

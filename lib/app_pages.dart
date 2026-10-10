@@ -7,6 +7,12 @@ import '../../features/menu/pages/index_pages.dart';
 
 class AppPages {
   static final pages = <GetPage>[
+    // "/" también abre el menú (en web es la ruta por defecto)
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const IndexPages(),
+    ),
+
     GetPage(
       name: AppRoutes.menu,
       page: () => const IndexPages(),
@@ -22,4 +28,4 @@ class AppPages {
       page: () =>  HomePagesAdmin(),
     ),
   ];
-}
+}

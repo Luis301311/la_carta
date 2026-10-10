@@ -17,27 +17,26 @@ class ExtraGroup {
     required this.options,
   });
 
-  factory ExtraGroup.fromMap(Map<String, dynamic> map) {
+  factory ExtraGroup.fromJson(Map<String, dynamic> json) {
     return ExtraGroup(
-      id: map['id'],
-      title: map['title'],
-      isRequired: map['isRequired'],
-      minSelection: map['minSelection'],
-      maxSelection: map['maxSelection'],
-      options: (map['options'] as List)
-          .map((e) => ExtraOption.fromMap(e))
+      id: json['id'],
+      title: json['title'] ?? '',
+      isRequired: json['isRequired'] ?? false,
+      minSelection: (json['minSelection'] as num?)?.toInt() ?? 0,
+      maxSelection: (json['maxSelection'] as num?)?.toInt() ?? 1,
+      options: ((json['options'] as List?) ?? [])
+          .map((e) => ExtraOption.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'title': title,
       'isRequired': isRequired,
       'minSelection': minSelection,
       'maxSelection': maxSelection,
-      'options': options.map((e) => e.toMap()).toList(),
+      'options': options.map((e) => e.toJson()).toList(),
     };
   }
 }

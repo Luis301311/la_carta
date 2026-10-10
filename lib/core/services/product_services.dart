@@ -1,98 +1,40 @@
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lacarta/main.dart';
 import 'package:lacarta/core/models/product/producto.dart';
+import 'package:lacarta/core/services/api_client.dart';
 
+/// Productos desde el panel de administración (requiere sesión)
 class ProductServices {
-  final String productCollection = "products";
-  final FirebaseFirestore _firebaseFirestore = clientDb;
+  final ApiClient _api = ApiClient.instance;
 
-  //SAVE
+  String _base(String companyId) => '/companies/$companyId/products';
 
-  Future<String> saveProduct(Product product) async {
-    final doc = await _firebaseFirestore
-        .collection(productCollection)
-        .add(product.toMap());
-    return doc.id;
-  }
-  
-  ///GET
-  Future<List<Product>> getProducts() async {
-    final snapshot = await _firebaseFirestore
-        .collection(productCollection)
-        .get();
-
-    return snapshot.docs.map((doc) {
-      return Product.fromMap(doc.data(), doc.id);
-    }).toList();
+  Future<List<Product>> getProducts(String companyId,
+      {String? categoryId}) async {
+    final data = await _api.get(
+      _base(companyId),
+      query: {'categoryId': categoryId},
+    ) as List;
+    return data
+        .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
-  //UPDATE
-  Future<void> updateProduct(Product product) async {
-    await _firebaseFirestore
-        .collection(productCollection)
-        .doc(product.id)
-        .update(product.toMap());
+  Future<Product> createProduct(String companyId, Product product) async {
+    final data = await _api.post(_base(companyId), product.toJson());
+    return Product.fromJson(Map<String, dynamic>.from(data));
   }
 
+  /// Reemplaza todos los datos del producto, incluidos sus grupos de extras
+  Future<Product> updateProduct(String companyId, Product product) async {
+    final data =
+        await _api.patch('${_base(companyId)}/${product.id}', product.toJson());
+    return Product.fromJson(Map<String, dynamic>.from(data));
+  }
 
+  Future<void> setAvailability(
+          String companyId, String productId, bool isAvailable) =>
+      _api.patch('${_base(companyId)}/$productId/availability',
+          {'isAvailable': isAvailable});
+
+  Future<void> deleteProduct(String companyId, String productId) =>
+      _api.delete('${_base(companyId)}/$productId');
 }
-
-
-
-
-
-/* Future<List<Product>> getProductsByCategory(String categoryId) async {
-  QuerySnapshot snapshot = await FirebaseFirestore.instance
-      .collection('categories')
-      .doc(categoryId)
-      .collection('products')
-      .get();
-
-  print("Categoria $categoryId → ${snapshot.docs.length} productos");
-
-  return snapshot.docs.map((doc) {
-    return Product.fromMap(
-      doc.data() as Map<String, dynamic>,
-      doc.id,
-    );
-  }).toList();
-} */
-
-/*   //GET
-  Future<List<Product>> getProductss() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collectionGroup('products') // ESCRÍBELO LITERAL
-        .get();
-
-
-    return snapshot.docs.map((doc) {
-      return Product.fromMap(
-        doc.data() as Map<String, dynamic>,
-        doc.id,
-      );
-    }).toList();
-
-  } */
-
-/*   Future<String> saveProduct(Product product) async {
-    final batch = _firebaseFirestore.batch();
-
-    final categoryRef = _firebaseFirestore.collection('categories').doc(product.categoryId);
-
-    final productRef = categoryRef.collection(productCollection).doc();
-
-    batch.set(productRef, product.toMap());
-
-    for (var extra in product.extras) {
-      final extraRef = productRef.collection('extras').doc();
-      batch.set(extraRef, extra.toMap());
-    }
-
-    // Ejecutar todo junto
-    await batch.commit();
-
-    return productRef.id; 
-  } */
-
-

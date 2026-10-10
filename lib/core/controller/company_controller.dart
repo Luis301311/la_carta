@@ -1,150 +1,127 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:lacarta/config/session.dart';
+import 'package:lacarta/core/models/category.dart';
 import 'package:lacarta/core/models/company/business_hours.dart';
 import 'package:lacarta/core/models/company/company.dart';
+import 'package:lacarta/core/models/menu.dart';
+import 'package:lacarta/core/models/product/producto.dart';
+import 'package:lacarta/core/services/api_client.dart';
 import 'package:lacarta/core/services/company_service.dart';
+import 'package:lacarta/core/services/menu_service.dart';
 
-class CompanyController extends GetxController {
-  final CompanyService companyService = CompanyService();
-  Rxn<Company> company = Rxn<Company>(); 
-  RxBool isLoading = false.obs; 
-  RxBool isOpen = false.obs;
+/// Restaurante que se está viendo y su menú público.
+/// Se crea en main.dart con el menú ya descargado, así las pantallas
+/// tienen los datos desde el primer frame.
+class RestaurantController extends GetxController {
+  RestaurantController(RestaurantMenu menu) {
+    _apply(menu);
+  }
+
+  final MenuService _menuService = MenuService();
+  final CompanyService _companyService = CompanyService();
+
+  final Rxn<Company> company = Rxn<Company>();
+  final RxList<ProductCategory> categories = <ProductCategory>[].obs;
+  final RxList<Product> products = <Product>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isOpen = false.obs;
+
+  Timer? _openStatusTimer;
+
   @override
   void onInit() {
     super.onInit();
-    fetchCompany();
-
-    //Status
-    ever(company, (_) => checkIfOpen());
-
-    Future.doWhile(() async {
-      await Future.delayed(Duration(minutes: 1));
+    // Revisa cada minuto si abrió o cerró
+    _openStatusTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       checkIfOpen();
-      return true;
     });
   }
 
-  // GET COMPANY (solo una)
-  void fetchCompany() async {
+  @override
+  void onClose() {
+    _openStatusTimer?.cancel();
+    super.onClose();
+  }
+
+  void _apply(RestaurantMenu menu) {
+    company.value = menu.company;
+    categories.assignAll(menu.categories);
+    products.assignAll(menu.products);
+    // El primer valor viene calculado por la API (en la zona horaria del restaurante)
+    isOpen.value = menu.company.isOpenNow;
+  }
+
+  /// Vuelve a descargar el menú (p. ej. "jalar para refrescar")
+  Future<void> refreshMenu() async {
     isLoading.value = true;
-
     try {
-      final companies = await companyService.getCompanies();
-
-      if (companies.isNotEmpty) {
-        company.value = companies.first; 
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Could not load company data');
+      _apply(await _menuService.getMenu(Session.slug));
+    } on ApiException catch (e) {
+      Get.snackbar('Error', e.message);
     } finally {
       isLoading.value = false;
     }
   }
 
-  // UPDATE COMPANY
+  /// Panel: guarda los datos de la empresa (requiere sesión)
   Future<void> updateCompany(Company updatedCompany) async {
+    isLoading.value = true;
     try {
-      isLoading.value = true;
-
-      await companyService.updateCompany(updatedCompany);
-
-      company.value = updatedCompany;
-
-      Get.snackbar('Success', 'Company updated successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Error updating company');
+      company.value = await _companyService.updateCompany(updatedCompany);
+      Get.snackbar('Éxito', 'Restaurante actualizado correctamente');
+    } on ApiException catch (e) {
+      Get.snackbar('Error', e.message);
     } finally {
       isLoading.value = false;
     }
   }
-
-  // CREATE (solo para pruebas)
-  Future<void> createCompany(Company newCompany) async {
-    try {
-      isLoading.value = true;
-
-      await companyService.createCompany(newCompany);
-
-      company.value = newCompany;
-
-      Get.snackbar('Success', 'Company created');
-    } catch (e) {
-      Get.snackbar('Error', 'Error creating company');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-
 
   void checkIfOpen() {
-    if (company.value != null) {
-      isOpen.value = isCompanyOpen(company.value!);
+    final c = company.value;
+    if (c != null) isOpen.value = isCompanyOpen(c);
+  }
+
+  /// Misma lógica que la API: soporta horarios que pasan la medianoche
+  /// (p. ej. 18:00–02:00). Sin horarios configurados = abierto.
+  bool isCompanyOpen(Company company, [DateTime? at]) {
+    final hours = company.businessHours;
+    if (hours.isEmpty) return true;
+
+    final now = at ?? DateTime.now();
+    final minutes = now.hour * 60 + now.minute;
+    final today = now.weekday;
+    final yesterday = today == 1 ? 7 : today - 1;
+
+    BusinessHours? find(int day) {
+      for (final h in hours) {
+        if (h.dayOfWeek == day) return h;
+      }
+      return null;
     }
-  }
 
-
-  bool isCompanyOpen(Company company) {
-    final now = DateTime.now();
-
-    // Día actual en inglés (igual que tu modelo)
-    final currentDay = _getDayName(now.weekday);
-
-    // Buscar horario de hoy
-    final todaySchedule = company.businessHours.firstWhere(
-      (h) => h.day == currentDay,
-      orElse: () => BusinessHours(
-        day: currentDay,
-        openTime: "",
-        closeTime: "",
-        closed: true,
-      ),
-    );
-
-    // Si está cerrado
-    if (todaySchedule.closed) return false;
-
-    // Convertir horas a DateTime
-    final openParts = todaySchedule.openTime.split(":");
-    final closeParts = todaySchedule.closeTime.split(":");
-
-    final openTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      int.parse(openParts[0]),
-      int.parse(openParts[1]),
-    );
-
-    final closeTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      int.parse(closeParts[0]),
-      int.parse(closeParts[1]),
-    );
-
-    return now.isAfter(openTime) && now.isBefore(closeTime);
-  }
-
-  String _getDayName(int weekday) {
-    switch (weekday) {
-      case 1:
-        return "Monday";
-      case 2:
-        return "Tuesday";
-      case 3:
-        return "Wednesday";
-      case 4:
-        return "Thursday";
-      case 5:
-        return "Friday";
-      case 6:
-        return "Saturday";
-      case 7:
-        return "Sunday";
-      default:
-        return "";
+    int toMin(String hhmm) {
+      final p = hhmm.split(':');
+      return int.parse(p[0]) * 60 + int.parse(p[1]);
     }
-  }
 
+    // Turno de hoy
+    final t = find(today);
+    if (t != null && !t.closed) {
+      final open = toMin(t.openTime), close = toMin(t.closeTime);
+      final inside = close > open
+          ? minutes >= open && minutes < close
+          : minutes >= open; // cierra después de medianoche
+      if (inside) return true;
+    }
+
+    // Turno de ayer que sigue abierto después de medianoche
+    final y = find(yesterday);
+    if (y != null && !y.closed) {
+      final open = toMin(y.openTime), close = toMin(y.closeTime);
+      if (close <= open && minutes < close) return true;
+    }
+    return false;
+  }
 }

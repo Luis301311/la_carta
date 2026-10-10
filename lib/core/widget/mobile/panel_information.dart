@@ -63,14 +63,14 @@ class PanelInformation extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  item.day,
+                  item.dayName,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   item.closed
-                      ? "Closed"
+                      ? "Cerrado"
                       : "${item.openTime} - ${item.closeTime}",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
@@ -84,7 +84,7 @@ class PanelInformation extends StatelessWidget {
           children: [
             Icon(Icons.location_on),
             SizedBox(width: 10),
-            Text("Dirección: ${company.location.address}"),
+            Expanded(child: Text("Dirección: ${company.location.address}")),
           ],
         ),
 
@@ -103,4 +103,4 @@ class PanelInformation extends StatelessWidget {
     ),
   );
  }
-}
+}

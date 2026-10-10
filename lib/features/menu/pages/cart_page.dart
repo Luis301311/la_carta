@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/widget/responsive.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/controller/cart_controller.dart';
@@ -28,7 +29,7 @@ class CartPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Obx(() {
+      body: ResponsiveCenter(child: Obx(() {
         if (cartController.cartItems.isEmpty) {
           return const Center(
             child: Text("El pedido está vacío"),
@@ -177,7 +178,7 @@ class CartPage extends StatelessWidget {
             ),
           ],
         );
-      }),
+      })),
     );
   }
 }

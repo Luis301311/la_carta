@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:lacarta/core/models/order.dart';
 import 'package:lacarta/core/services/api_client.dart';
 
@@ -13,5 +15,23 @@ class OrderService {
       order.toJson(),
     );
     return OrderResult.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  /// POST /public/:slug/orders/:orderId/proof (captura del pago).
+  /// Devuelve el nuevo link de WhatsApp (que ya dice "comprobante adjunto").
+  Future<String?> uploadProof({
+    required String slug,
+    required String orderId,
+    required String token,
+    required Uint8List bytes,
+    required String filename,
+  }) async {
+    final data = await _api.uploadImage(
+      '/public/${Uri.encodeComponent(slug)}/orders/$orderId/proof',
+      bytes,
+      filename: filename,
+      fields: {'token': token},
+    );
+    return (data as Map)['whatsappUrl'] as String?;
   }
 }

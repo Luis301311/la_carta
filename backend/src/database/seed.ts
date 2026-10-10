@@ -58,6 +58,10 @@ async function seedDemo(ds: DataSource) {
         latitude: 10.4631,
         longitude: -73.2532,
         primaryColor: '#E53935',
+        acceptsCash: true,
+        acceptsTransfer: true,
+        breBKey: '@burgerhouse',
+        paymentHolder: 'Burger House SAS',
       }),
     );
     console.log('  ✓ empresa burger_house');

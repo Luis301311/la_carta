@@ -26,6 +26,10 @@ class ApiClient {
 
   final http.Client _http = http.Client();
 
+  /// Lo configura AuthController: qué hacer si la API responde 401
+  /// estando logueado (token vencido o usuario desactivado).
+  static void Function()? onUnauthorized;
+
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final params = query == null
         ? null
@@ -63,10 +67,12 @@ class ApiClient {
     String path,
     Uint8List bytes, {
     String filename = 'imagen.jpg',
+    Map<String, String>? fields,
   }) {
     return _send(() async {
       final request = http.MultipartRequest('POST', _uri(path))
         ..headers.addAll(_headers(json: false))
+        ..fields.addAll(fields ?? const {})
         ..files.add(http.MultipartFile.fromBytes(
           'file',
           bytes,
@@ -109,6 +115,9 @@ class ApiClient {
 
     if (res.statusCode >= 200 && res.statusCode < 300) return data;
 
+    if (res.statusCode == 401 && Session.token != null) {
+      onUnauthorized?.call();
+    }
     throw ApiException(res.statusCode, _errorMessage(res.statusCode, data));
   }
 

@@ -12,7 +12,7 @@ import 'package:lacarta/core/services/storade_service.dart';
 import 'package:lacarta/core/widget/admin/app_floating_button.dart';
 import 'package:lacarta/features/admin/create_extra_group_dialog.dart';
 import 'package:lacarta/features/admin/create_extra_option_dialog.dart';
-import 'package:lacarta/config/session.dart';
+import 'package:lacarta/core/controller/auth_controller.dart';
 import 'package:lacarta/core/services/api_client.dart';
 class CreateProductPage extends StatefulWidget {
   const CreateProductPage({super.key});
@@ -22,8 +22,11 @@ class CreateProductPage extends StatefulWidget {
 }
 
 class _CreateProductPageState extends State<CreateProductPage> {
-  final ProductController _productController = Get.put(ProductController());
-  final CategoryController _categoryController = Get.put(CategoryController());
+  // Instancias del panel (tag 'admin'), separadas de las del menú público
+  final ProductController _productController =
+      Get.put(ProductController(admin: true), tag: 'admin');
+  final CategoryController _categoryController =
+      Get.put(CategoryController(admin: true), tag: 'admin');
   final storageService = StorageService();
   final _formKey = GlobalKey<FormState>();
 
@@ -497,7 +500,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
 
   void saveProduct() async {
-    final companyId = Session.companyId;
+    final companyId = AuthController.to.activeCompanyId.value;
     if (companyId == null) {
       Get.snackbar('Error', 'No hay restaurante seleccionado');
       return;
@@ -511,7 +514,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
         );
       }
     } on ApiException catch (e) {
-      // Sin sesión de admin la API responde 401 (el login es el siguiente paso)
       Get.snackbar('No se pudieron subir las imágenes', e.message);
       return;
     }

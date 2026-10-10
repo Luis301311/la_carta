@@ -10,6 +10,13 @@ class CompanyService {
     return Company.fromJson(Map<String, dynamic>.from(data));
   }
 
+  /// PATCH parcial: solo los campos que se envían (p. ej. los de pagos)
+  Future<Company> patchCompany(
+      String companyId, Map<String, dynamic> fields) async {
+    final data = await _api.patch('/companies/$companyId', fields);
+    return Company.fromJson(Map<String, dynamic>.from(data));
+  }
+
   Future<Company> updateCompany(Company company) async {
     final data = await _api.patch('/companies/${company.id}', company.toJson());
     return Company.fromJson(Map<String, dynamic>.from(data));

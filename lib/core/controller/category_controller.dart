@@ -1,11 +1,15 @@
 import 'package:get/get.dart';
-import 'package:lacarta/config/session.dart';
+import 'package:lacarta/core/controller/auth_controller.dart';
 import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:lacarta/core/models/category.dart';
 import 'package:lacarta/core/services/api_client.dart';
 import 'package:lacarta/core/services/category_services.dart';
 
 class CategoryController extends GetxController {
+  /// false = menú público. true = panel (en el panel: tag 'admin')
+  final bool admin;
+  CategoryController({this.admin = false});
+
   final CategoryServices _categoryServices = CategoryServices();
   RxList<ProductCategory> categories = <ProductCategory>[].obs;
   RxList<ProductCategory> filteredCategories = <ProductCategory>[].obs;
@@ -21,9 +25,11 @@ class CategoryController extends GetxController {
   Future<void> fetchCategories() async {
     isLoading.value = true;
     try {
-      if (Session.isLoggedIn && Session.companyId != null) {
-        categories.assignAll(
-            await _categoryServices.getCategories(Session.companyId!));
+      final companyId = AuthController.to.activeCompanyId.value;
+      if (admin) {
+        if (companyId == null) return;
+        categories
+            .assignAll(await _categoryServices.getCategories(companyId));
       } else {
         categories.assignAll(Get.find<RestaurantController>().categories);
       }
@@ -37,7 +43,7 @@ class CategoryController extends GetxController {
 
   /// Panel: crear categoría
   Future<bool> createCategory(ProductCategory category) async {
-    final companyId = Session.companyId;
+    final companyId = AuthController.to.activeCompanyId.value;
     if (companyId == null) return false;
     isLoading.value = true;
     try {

@@ -32,7 +32,7 @@ class OrderTypeSelector extends StatelessWidget {
           );
         },
         child: Container(
-          height: 130,
+          height: 120,
           margin: const EdgeInsets.symmetric(horizontal: 6),
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
@@ -51,6 +51,8 @@ class OrderTypeSelector extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
                 style: TextStyle(
                     color: selected ? Colors.white : Colors.black,
                     fontWeight: FontWeight.bold,

@@ -9,6 +9,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE user_role    AS ENUM ('SUPER_ADMIN', 'COMPANY_ADMIN');
 CREATE TYPE order_status AS ENUM ('pending','confirmed','preparing','ready','delivered','cancelled');
 CREATE TYPE order_type   AS ENUM ('dine_in','takeaway','delivery');
+CREATE TYPE payment_method AS ENUM ('cash','transfer');
 
 CREATE TABLE companies (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -25,6 +26,13 @@ CREATE TABLE companies (
   cover_url      varchar(500),
   primary_color  varchar(9),
   timezone       varchar(60) NOT NULL DEFAULT 'America/Bogota',
+  -- Pagos sin pasarela (transferencia por QR / llave Bre-B, verificada a mano)
+  accepts_cash     boolean NOT NULL DEFAULT true,
+  accepts_transfer boolean NOT NULL DEFAULT false,
+  bre_bkey         varchar(80),            -- llave Bre-B
+  payment_holder   varchar(120),
+  payment_qr_url   varchar(500),
+  payment_notes    text,
   is_active      boolean NOT NULL DEFAULT true,
   created_at     timestamptz NOT NULL DEFAULT now(),
   updated_at     timestamptz NOT NULL DEFAULT now()
@@ -111,6 +119,9 @@ CREATE TABLE orders (
   address       varchar(255),
   table_number  varchar(20),
   notes         text,
+  payment_method    payment_method NOT NULL DEFAULT 'cash',
+  payment_proof_url varchar(500),            -- captura del comprobante
+  proof_token       varchar(64),             -- clave para subir el comprobante sin login
   total         numeric(12,2) NOT NULL,
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now(),

@@ -60,6 +60,31 @@ export class Company {
   @Column({ length: 60, default: 'America/Bogota' })
   timezone: string;
 
+  // ---------- Pagos (sin pasarela) ----------
+
+  @Column({ default: true })
+  acceptsCash: boolean;
+
+  /** Transferencia por QR o llave Bre-B; se verifica con el comprobante */
+  @Column({ default: false })
+  acceptsTransfer: boolean;
+
+  /** Llave Bre-B (celular, cédula, correo o alfanumérica) */
+  @Column({ type: 'varchar', length: 80, nullable: true })
+  breBKey: string | null;
+
+  /** Nombre del titular de la cuenta, para que el cliente verifique */
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  paymentHolder: string | null;
+
+  /** Imagen del código QR de cobro (la genera la app del banco) */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  paymentQrUrl: string | null;
+
+  /** Instrucciones extra, p. ej. "También Nequi 300 123 4567" */
+  @Column({ type: 'text', nullable: true })
+  paymentNotes: string | null;
+
   /** false = suspendida por el super admin: el menú no se muestra y su admin no puede entrar */
   @Column({ default: true })
   isActive: boolean;

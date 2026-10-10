@@ -13,6 +13,12 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
+/** Sin pasarela: la transferencia (QR o llave Bre-B) se verifica a mano con el comprobante */
+export enum PaymentMethod {
+  CASH = 'cash',
+  TRANSFER = 'transfer',
+}
+
 export enum OrderType {
   DINE_IN = 'dine_in',
   TAKEAWAY = 'takeaway',

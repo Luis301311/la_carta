@@ -1,10 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
+import { mkdirSync, writeFileSync } from 'fs';
+import { join, resolve } from 'path';
 import { CategoriesService } from '../categories/categories.service';
+import { PaymentMethod } from '../common/enums';
 import { CompaniesService } from '../companies/companies.service';
+import { Company } from '../companies/company.entity';
 import { isOpenNow } from '../companies/opening-hours';
 import { CreateOrderDto } from '../orders/dto/order.dto';
+import { Order } from '../orders/order.entity';
 import { OrdersService } from '../orders/orders.service';
 import { ProductsService } from '../products/products.service';
+
+const IMAGE_EXT: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+};
 
 @Injectable()
 export class PublicService {
@@ -13,6 +27,7 @@ export class PublicService {
     private readonly categories: CategoriesService,
     private readonly products: ProductsService,
     private readonly orders: OrdersService,
+    private readonly config: ConfigService,
   ) {}
 
   /** Todo lo que necesita la app del cliente en UNA sola petición */
@@ -55,6 +70,13 @@ export class PublicService {
         timezone: company.timezone,
         businessHours: company.businessHours ?? [],
         isOpenNow: isOpenNow(company.businessHours ?? [], company.timezone),
+        // Pagos
+        acceptsCash: company.acceptsCash,
+        acceptsTransfer: company.acceptsTransfer,
+        breBKey: company.acceptsTransfer ? company.breBKey : null,
+        paymentHolder: company.acceptsTransfer ? company.paymentHolder : null,
+        paymentQrUrl: company.acceptsTransfer ? company.paymentQrUrl : null,
+        paymentNotes: company.paymentNotes,
       },
       categories: categories
         .map((c) => ({
@@ -69,16 +91,53 @@ export class PublicService {
     };
   }
 
+  /**
+   * Crea el pedido. Si es por transferencia, devuelve `proofToken`: la app lo
+   * usa enseguida para subir el comprobante (POST .../orders/:id/proof).
+   */
   async createOrder(slug: string, dto: CreateOrderDto) {
     const company = await this.companies.findActiveBySlug(slug);
-    const order = await this.orders.create(company.id, dto);
+    const { order, proofToken } = await this.orders.create(company.id, dto);
     return {
       order,
-      // Para que Flutter abra WhatsApp con el pedido ya armado
-      whatsappUrl: company.whatsappPhone
-        ? `https://wa.me/${company.whatsappPhone}?text=${encodeURIComponent(buildWhatsappText(company.name, order))}`
-        : null,
+      proofToken,
+      whatsappUrl: this.whatsappUrl(company, order),
     };
+  }
+
+  /** El cliente adjunta la captura del pago (sin login, con su proofToken) */
+  async attachProof(
+    slug: string,
+    orderId: string,
+    token: string,
+    file: Express.Multer.File | undefined,
+  ) {
+    if (!file) throw new BadRequestException('Envía la imagen en el campo "file"');
+    const ext = IMAGE_EXT[file.mimetype];
+    if (!ext) throw new BadRequestException('El comprobante debe ser una imagen');
+
+    const company = await this.companies.findActiveBySlug(slug);
+    await this.orders.assertCanAttachProof(company.id, orderId, token);
+
+    // Se guarda en disco solo después de validar la clave
+    const dir = join(resolve(process.env.UPLOAD_DIR ?? 'uploads'), company.id, 'proofs');
+    mkdirSync(dir, { recursive: true });
+    const filename = `${randomUUID()}${ext}`;
+    writeFileSync(join(dir, filename), file.buffer);
+
+    const base = (this.config.get<string>('PUBLIC_URL') ?? 'http://localhost:3000').replace(/\/$/, '');
+    const order = await this.orders.setPaymentProof(
+      company.id,
+      orderId,
+      `${base}/uploads/${company.id}/proofs/${filename}`,
+    );
+    return { order, whatsappUrl: this.whatsappUrl(company, order) };
+  }
+
+  private whatsappUrl(company: Company, order: Order) {
+    return company.whatsappPhone
+      ? `https://wa.me/${company.whatsappPhone}?text=${encodeURIComponent(buildWhatsappText(company.name, order))}`
+      : null;
   }
 }
 
@@ -89,7 +148,7 @@ const TYPE_LABEL: Record<string, string> = {
   delivery: 'Domicilio',
 };
 
-function buildWhatsappText(companyName: string, order: Awaited<ReturnType<OrdersService['findOne']>>) {
+function buildWhatsappText(companyName: string, order: Order) {
   const lines = [`*Pedido #${order.orderNumber} - ${companyName}*`, ''];
   for (const item of order.items ?? []) {
     lines.push(`${item.quantity} x ${item.productName} - ${money(item.lineTotal)}`);
@@ -104,5 +163,17 @@ function buildWhatsappText(companyName: string, order: Awaited<ReturnType<Orders
   if (order.address) lines.push(`Dirección: ${order.address}`);
   if (order.tableNumber) lines.push(`Mesa: ${order.tableNumber}`);
   if (order.notes) lines.push(`Notas: ${order.notes}`);
+
+  lines.push('');
+  if (order.paymentMethod === PaymentMethod.TRANSFER) {
+    lines.push(
+      order.paymentProofUrl
+        ? '*Pago:* Transferencia — el comprobante quedó adjunto al pedido ✅'
+        : '*Pago:* Transferencia — te envío el comprobante por este chat 📎',
+    );
+  } else {
+    lines.push('*Pago:* Efectivo');
+  }
+  lines.push('Quedo atento a la confirmación 🙌');
   return lines.join('\n');
 }

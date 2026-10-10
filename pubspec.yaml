@@ -39,6 +39,7 @@ dependencies:
   #api (NestJS)
   http: ^1.2.2
   http_parser: ^4.0.2
+  shared_preferences: ^2.3.2 #sesión del panel
   url_launcher: #enviar a wp
   google_maps_flutter: #mapa
   flutter_map: ^6.0.0

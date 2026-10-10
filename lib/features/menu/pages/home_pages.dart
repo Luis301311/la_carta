@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/widget/responsive.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get/state_manager.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
@@ -67,7 +68,9 @@ class _HomePagesState extends State<HomePages> {
   Widget build(BuildContext context) {
     return Scaffold(
     backgroundColor: CustomColorBasic.white2,
-    body: CustomScrollView(
+    // En PC/tablet el menú queda centrado con un ancho máximo
+    body: ResponsiveCenter(
+    child: CustomScrollView(
     controller: _scrollController,
     slivers: [
           SliverToBoxAdapter(child: HeaderMobile()),
@@ -90,8 +93,10 @@ class _HomePagesState extends State<HomePages> {
                     final productsForCategory = productController.products
                     .where((p) => p.categoryId == category.id)
                     .toList();
-                    return LayoutBuilder(
-                      builder: (context, constraints) {
+                    // Builder (no LayoutBuilder): solo se necesita el context
+                    // para medir la posición de la categoría
+                    return Builder(
+                      builder: (context) {
                         // posición real
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           final box = context.findRenderObject() as RenderBox?;
@@ -113,6 +118,7 @@ class _HomePagesState extends State<HomePages> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -189,7 +195,10 @@ class _CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
     BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
+    // El hijo SIEMPRE debe ocupar todo el alto del encabezado (60 px).
+    // Si mide menos, Flutter lanza "layoutExtent exceeds paintExtent" y la
+    // pantalla deja de responder a los toques.
+    return SizedBox.expand(child: child);
   }
 
   @override

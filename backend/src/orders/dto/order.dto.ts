@@ -16,7 +16,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { OrderStatus, OrderType } from '../../common/enums';
+import { OrderStatus, OrderType, PaymentMethod } from '../../common/enums';
 
 export class OrderItemExtraInputDto {
   @ApiProperty()
@@ -63,7 +63,7 @@ export class CreateOrderDto {
   @IsString() @MinLength(2) @MaxLength(120)
   customerName: string;
 
-  @ApiPropertyOptional({ example: '3001234567', description: 'Obligatorio para domicilio' })
+  @ApiPropertyOptional({ example: '3001234567', description: 'Obligatorio: el restaurante avisa por WhatsApp' })
   @IsOptional() @IsString() @MaxLength(30)
   phone?: string;
 
@@ -78,6 +78,10 @@ export class CreateOrderDto {
   @ApiPropertyOptional()
   @IsOptional() @IsString() @MaxLength(500)
   notes?: string;
+
+  @ApiPropertyOptional({ enum: PaymentMethod, default: PaymentMethod.CASH })
+  @IsOptional() @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod;
 
   @ApiProperty({ type: [OrderItemInputDto] })
   @IsArray()

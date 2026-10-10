@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/widget/responsive.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/controller/order_controller.dart';
@@ -14,14 +15,21 @@ class ProductDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Un controlador por producto (tag): antes se reutilizaba el del primer
     // producto abierto y se mezclaban extras entre productos.
+    final tag = product.id ?? product.name;
     final ProductDetailController productoController = Get.put(
       ProductDetailController(product),
-      tag: product.id ?? product.name,
+      tag: tag,
     );
     final OrderController orderController = Get.find<OrderController>();
-    return Scaffold(
+    // Al salir se borra el controlador: la próxima vez el producto abre limpio
+    // (sin la cantidad ni los extras de la vez anterior)
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) Get.delete<ProductDetailController>(tag: tag);
+      },
+      child: Scaffold(
       backgroundColor: CustomColorBasic.white1,
-      body: SafeArea(
+      body: ResponsiveCenter(child: SafeArea(
         child: Column(
           children: [
 
@@ -33,7 +41,9 @@ class ProductDetailPage extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Get.back();
+                      // maybePop cierra ESTA pantalla (Get.back cerraría
+                      // primero un snackbar si hubiera uno abierto)
+                      Navigator.of(context).maybePop();
                     },
                     icon: const Icon(Icons.arrow_back, size: 28, color: Colors.blue,)
                   ),
@@ -42,7 +52,8 @@ class ProductDetailPage extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: (){ 
-                          Get.to(()=>CartPage());
+                          Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => CartPage()));
                           },
                         icon: Icon(Icons.receipt_long,)
                       ),
@@ -98,7 +109,10 @@ class ProductDetailPage extends StatelessWidget {
 
                           const SizedBox(height: 10),
 
-                          /// INDICADOR
+                          /// INDICADOR (solo si hay más de una foto).
+                          /// Con 0 o 1 foto el Obx no leía ningún observable y GetX lanzaba
+                          /// "improper use of a GetX".
+                        if (product.imageUrl.length > 1)
                         Obx(() => Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
@@ -357,7 +371,8 @@ class ProductDetailPage extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
+    ),
     );
   }
 }

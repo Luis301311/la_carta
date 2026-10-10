@@ -4,6 +4,7 @@ import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/widget/responsive.dart';
 import 'package:url_launcher/url_launcher.dart';
 class LocationPage extends StatelessWidget {
   const LocationPage({super.key});
@@ -19,7 +20,9 @@ class LocationPage extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       }
 
-      return ListView(
+      return ResponsiveCenter(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
         children: [
 
           //  MAPA (solo si el restaurante tiene coordenadas)
@@ -27,7 +30,8 @@ class LocationPage extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
             child: SizedBox(
-              height: 400,
+              // Alto según la pantalla, entre 220 y 400 px
+              height: (MediaQuery.sizeOf(context).height * 0.45).clamp(220.0, 400.0),
               child: FlutterMap(
                 options: MapOptions(
                   initialCenter: LatLng(
@@ -145,7 +149,7 @@ class LocationPage extends StatelessWidget {
             ),
           ),
         ],
-      );
+      ));
     });
   }
 }

@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/constant/order_status.dart';
 import 'package:lacarta/core/controller/cart_controller.dart';
+import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:lacarta/core/controller/order_controller.dart';
 import 'package:lacarta/core/models/order.dart';
+import 'package:lacarta/core/widget/mobile/form/payment_section.dart';
 
 /// Formulario único para los tres tipos de pedido.
 /// Cada tipo pide solo los campos que la API exige:
@@ -29,6 +31,21 @@ class _OrderFormState extends State<OrderForm> {
 
   final OrderController _orderController = Get.find<OrderController>();
   final CartController _cartController = Get.find<CartController>();
+  final RestaurantController _restaurant = Get.find<RestaurantController>();
+
+  late String _payment;
+  PaymentProof? _proof;
+  bool _showProofError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final company = _restaurant.company.value;
+    // Efectivo por defecto si lo aceptan; si no, transferencia
+    _payment = (company == null || company.acceptsCash)
+        ? PaymentMethod.cash
+        : PaymentMethod.transfer;
+  }
 
   bool get _isDelivery => widget.type == OrderType.delivery;
   bool get _isDineIn => widget.type == OrderType.dineIn;
@@ -54,9 +71,16 @@ class _OrderFormState extends State<OrderForm> {
       (v == null || v.trim().isEmpty) ? msg : null;
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formOk = _formKey.currentState!.validate();
+    final needsProof = _payment == PaymentMethod.transfer && _proof == null;
+    if (needsProof != _showProofError) {
+      setState(() => _showProofError = needsProof);
+    }
+    if (!formOk || needsProof) return;
 
     await _orderController.sendOrder(
+      proof: _payment == PaymentMethod.transfer ? _proof?.bytes : null,
+      proofName: _proof?.name ?? 'comprobante.jpg',
       OrderCart(
         // Copia de la lista: el carrito se vacía si el pedido sale bien
         items: _cartController.cartItems.toList(),
@@ -66,6 +90,7 @@ class _OrderFormState extends State<OrderForm> {
         address: _isDelivery ? _address.text : null,
         table: _isDineIn ? _table.text : null,
         notes: _notes.text,
+        paymentMethod: _payment,
       ),
     );
   }
@@ -118,16 +143,22 @@ class _OrderFormState extends State<OrderForm> {
                   decoration: const InputDecoration(labelText: 'Número de mesa'),
                   validator: (v) => _required(v, 'Escribe el número de mesa'),
                 ),
-              if (!_isDineIn)
-                TextFormField(
-                  controller: _phone,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: _isDelivery ? 'Teléfono' : 'Teléfono (opcional)',
-                  ),
-                  validator: (v) =>
-                      _isDelivery ? _required(v, 'Escribe el teléfono') : null,
+              // Obligatorio en todos los pedidos: por aquí el restaurante
+              // avisa cuando confirma el pago y cuando el pedido está listo
+              TextFormField(
+                controller: _phone,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Celular (WhatsApp)',
+                  helperText: 'Te avisaremos por aquí cuando tu pedido esté listo',
                 ),
+                validator: (v) {
+                  final digits = (v ?? '').replaceAll(RegExp(r'\D'), '');
+                  if (digits.isEmpty) return 'Escribe tu celular';
+                  if (digits.length < 7) return 'Número no válido';
+                  return null;
+                },
+              ),
               if (_isDelivery)
                 TextFormField(
                   controller: _address,
@@ -140,6 +171,27 @@ class _OrderFormState extends State<OrderForm> {
                   labelText: 'Notas para el restaurante (opcional)',
                 ),
               ),
+              const SizedBox(height: 18),
+              // Forma de pago (solo las que acepta el restaurante)
+              Builder(builder: (context) {
+                final company = _restaurant.company.value;
+                if (company == null) return const SizedBox.shrink();
+                return PaymentSection(
+                  company: company,
+                  method: _payment,
+                  onMethodChanged: (m) => setState(() {
+                    _payment = m;
+                    _showProofError = false;
+                  }),
+                  total: _cartController.totalCart,
+                  proof: _proof,
+                  onProofChanged: (p) => setState(() {
+                    _proof = p;
+                    if (p != null) _showProofError = false;
+                  }),
+                  showProofError: _showProofError,
+                );
+              }),
               const SizedBox(height: 15),
               Obx(() => Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

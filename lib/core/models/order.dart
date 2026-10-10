@@ -10,6 +10,9 @@ class OrderCart {
   final String? table; // si come en el sitio
   final String? notes;
 
+  /// PaymentMethod.cash | PaymentMethod.transfer
+  final String paymentMethod;
+
   OrderCart({
     required this.items,
     required this.type,
@@ -18,6 +21,7 @@ class OrderCart {
     this.address,
     this.table,
     this.notes,
+    this.paymentMethod = 'cash',
   });
 
   /// Total estimado en el celular. El total real lo calcula la API.
@@ -36,6 +40,7 @@ class OrderCart {
       if (clean(address) != null) 'address': clean(address),
       if (clean(table) != null) 'tableNumber': clean(table),
       if (clean(notes) != null) 'notes': clean(notes),
+      'paymentMethod': paymentMethod,
       'items': items.map((e) => e.toJson()).toList(),
     };
   }
@@ -48,11 +53,15 @@ class OrderResult {
   final double total;
   final String? whatsappUrl;
 
+  /// Solo en pedidos por transferencia: clave para subir el comprobante
+  final String? proofToken;
+
   OrderResult({
     required this.id,
     required this.orderNumber,
     required this.total,
     this.whatsappUrl,
+    this.proofToken,
   });
 
   factory OrderResult.fromJson(Map<String, dynamic> json) {
@@ -62,6 +71,7 @@ class OrderResult {
       orderNumber: (order['orderNumber'] as num).toInt(),
       total: (order['total'] as num).toDouble(),
       whatsappUrl: json['whatsappUrl'],
+      proofToken: json['proofToken'],
     );
   }
 }

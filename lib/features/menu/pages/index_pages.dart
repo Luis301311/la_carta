@@ -21,6 +21,8 @@ class _IndexPagesState extends State<IndexPages> {
 
     return Scaffold(
       body: pages[selectedIndex],
+      // Barra a todo el ancho: al encerrarla en un ancho máximo, su animación
+      // disparaba "_debugRelayoutBoundaryAlreadyMarkedNeedsLayout"
       bottomNavigationBar: CurvedNavigationBar(
         items: [
           _buildNavItem(Icons.restaurant, "Menu", 0),

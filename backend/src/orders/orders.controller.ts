@@ -17,6 +17,12 @@ export class OrdersController {
     return this.orders.findAll(companyId, query);
   }
 
+  /** ¿Cambió algo? (va antes de ':id' para que no la tome como un id) */
+  @Get('last-change')
+  lastChange(@Param('companyId') companyId: string) {
+    return this.orders.lastChange(companyId);
+  }
+
   @Get(':id')
   findOne(@Param('companyId') companyId: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.orders.findOne(companyId, id);

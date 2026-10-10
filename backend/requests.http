@@ -157,3 +157,47 @@ Content-Type: application/json
 
 ### 16) Público: el menú de una empresa suspendida -> 404
 GET {{api}}/public/don_tito/menu
+
+### =====================================================================
+### PAGOS (sin pasarela)
+### =====================================================================
+
+### 17) Admin Burger: configurar métodos de pago
+PATCH {{api}}/companies/{{burgerId}}
+Authorization: Bearer {{burgerToken}}
+Content-Type: application/json
+
+{
+  "acceptsCash": true,
+  "acceptsTransfer": true,
+  "breBKey": "@burgerhouse",
+  "paymentHolder": "Burger House SAS",
+  "paymentNotes": "Envía la captura del pago para confirmar tu pedido"
+}
+
+### 18) Público: pedido por transferencia -> devuelve proofToken
+# @name transferOrder
+POST {{api}}/public/burger_house/orders
+Content-Type: application/json
+
+{
+  "type": "takeaway",
+  "customerName": "Luis",
+  "paymentMethod": "transfer",
+  "items": [ { "productId": "PEGA_AQUI_ID_PRODUCTO_SIN_EXTRAS", "quantity": 1 } ]
+}
+
+### 19) Público: subir comprobante (cambia la ruta de la imagen por una tuya)
+POST {{api}}/public/burger_house/orders/{{transferOrder.response.body.order.id}}/proof
+Content-Type: multipart/form-data; boundary=----LaCarta
+
+------LaCarta
+Content-Disposition: form-data; name="token"
+
+{{transferOrder.response.body.proofToken}}
+------LaCarta
+Content-Disposition: form-data; name="file"; filename="comprobante.png"
+Content-Type: image/png
+
+< ./comprobante.png
+------LaCarta--

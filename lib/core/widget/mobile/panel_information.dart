@@ -6,8 +6,9 @@ class PanelInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-    padding: EdgeInsets.all(20),
+    // Con scroll: en pantallas bajas los 7 días del horario no cabían
+    return SingleChildScrollView(
+    padding: const EdgeInsets.all(20),
     child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

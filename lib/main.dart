@@ -5,6 +5,7 @@ import 'package:lacarta/app_pages.dart';
 import 'package:lacarta/config/api_config.dart';
 import 'package:lacarta/config/app_routes.dart';
 import 'package:lacarta/config/session.dart';
+import 'package:lacarta/core/controller/auth_controller.dart';
 import 'package:lacarta/core/controller/cart_controller.dart';
 import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:lacarta/core/controller/order_controller.dart';
@@ -19,6 +20,10 @@ Future<void> main() async {
   final segments = Uri.base.pathSegments.where((s) => s.isNotEmpty).toList();
   Session.slug = segments.isNotEmpty ? segments.first : ApiConfig.defaultSlug;
 
+  // Sesión del panel guardada en el dispositivo (si la hay)
+  final auth = Get.put(AuthController(), permanent: true);
+  await auth.restore();
+
   try {
     // Una sola petición trae empresa, horario, categorías y productos
     final menu = await MenuService().getMenu(Session.slug);
@@ -30,6 +35,13 @@ Future<void> main() async {
 
     runApp(const MyApp());
   } on ApiException catch (e) {
+    // Si lo que se abrió es el panel (/#/login, /#/admin...), no hace falta
+    // el menú público: se arranca la app igual.
+    final route = Uri.base.fragment;
+    if (route.startsWith(AppRoutes.login) || route.startsWith(AppRoutes.admin)) {
+      runApp(const MyApp());
+      return;
+    }
     runApp(ErrorApp(
       message: e.statusCode == 404
           ? 'No encontramos el restaurante "${Session.slug}".'

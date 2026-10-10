@@ -1,36 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
-import 'package:lacarta/core/constant/list_producto.dart';
 
+/// Barra de búsqueda fija del menú.
+/// Va dentro de un encabezado de 60 px: el campo es "denso" para que quepa
+/// (antes medía ~76 px con el padding y se desbordaba).
 class SeachMobile extends StatelessWidget {
   const SeachMobile({super.key});
 
   @override
   Widget build(BuildContext context) {
-    
     return Container(
       color: CustomColorBasic.white2,
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              onChanged: (value) {
-              },
+              onChanged: (value) {},
               decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
-                  
                 ),
                 hintText: "Buscar...",
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
-          SizedBox(width: 20,),
+          const SizedBox(width: 8),
           IconButton(
-            onPressed: (){}, 
-            icon: Icon(Icons.tune, size: 30,)
+            visualDensity: VisualDensity.compact,
+            onPressed: () {},
+            icon: const Icon(Icons.tune, size: 28),
           )
         ],
       ),

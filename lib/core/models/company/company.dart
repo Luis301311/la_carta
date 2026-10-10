@@ -21,6 +21,18 @@ class Company {
   /// Calculado por la API al cargar el menú
   final bool isOpenNow;
 
+  // ---------- Pagos (sin pasarela) ----------
+  final bool acceptsCash;
+  final bool acceptsTransfer;
+
+  /// Llave Bre-B
+  final String? breBKey;
+  final String? paymentHolder;
+
+  /// Imagen del QR de cobro
+  final String? paymentQrUrl;
+  final String? paymentNotes;
+
   Company({
     required this.id,
     required this.name,
@@ -36,7 +48,16 @@ class Company {
     this.primaryColor,
     this.isActive = true,
     this.isOpenNow = true,
+    this.acceptsCash = true,
+    this.acceptsTransfer = false,
+    this.breBKey,
+    this.paymentHolder,
+    this.paymentQrUrl,
+    this.paymentNotes,
   });
+
+  static String? _nonEmpty(dynamic v) =>
+      (v is String && v.trim().isNotEmpty) ? v : null;
 
   factory Company.fromJson(Map<String, dynamic> json) {
     return Company(
@@ -61,6 +82,12 @@ class Company {
       primaryColor: json['primaryColor'],
       isActive: json['isActive'] ?? true,
       isOpenNow: json['isOpenNow'] ?? true,
+      acceptsCash: json['acceptsCash'] ?? true,
+      acceptsTransfer: json['acceptsTransfer'] ?? false,
+      breBKey: _nonEmpty(json['breBKey']),
+      paymentHolder: _nonEmpty(json['paymentHolder']),
+      paymentQrUrl: _nonEmpty(json['paymentQrUrl']),
+      paymentNotes: _nonEmpty(json['paymentNotes']),
     );
   }
 

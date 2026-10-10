@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { decimalTransformer } from '../common/decimal.transformer';
-import { OrderStatus, OrderType } from '../common/enums';
+import { OrderStatus, OrderType, PaymentMethod } from '../common/enums';
 import { Company } from '../companies/company.entity';
 import { OrderItem } from './order-item.entity';
 
@@ -58,6 +58,25 @@ export class Order {
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentMethod,
+    enumName: 'payment_method',
+    default: PaymentMethod.CASH,
+  })
+  paymentMethod: PaymentMethod;
+
+  /** Captura del comprobante de transferencia que sube el cliente */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  paymentProofUrl: string | null;
+
+  /**
+   * Clave de un solo uso que recibe el cliente al crear el pedido, para poder
+   * subir su comprobante sin iniciar sesión. Nunca se devuelve en consultas.
+   */
+  @Column({ type: 'varchar', length: 64, nullable: true, select: false })
+  proofToken: string | null;
 
   @Column({ type: 'numeric', precision: 12, scale: 2, transformer: decimalTransformer })
   total: number;

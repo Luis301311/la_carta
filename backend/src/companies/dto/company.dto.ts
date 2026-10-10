@@ -72,6 +72,32 @@ export class CompanyProfileDto {
   @ApiPropertyOptional({ example: 'America/Bogota' })
   @IsOptional() @IsString() @MaxLength(60)
   timezone?: string;
+
+  // ---------- Pagos ----------
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional() @IsBoolean()
+  acceptsCash?: boolean;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional() @IsBoolean()
+  acceptsTransfer?: boolean;
+
+  @ApiPropertyOptional({ example: '@burgerhouse', description: 'Llave Bre-B' })
+  @IsOptional() @IsString() @MaxLength(80)
+  breBKey?: string;
+
+  @ApiPropertyOptional({ example: 'Burger House SAS' })
+  @IsOptional() @IsString() @MaxLength(120)
+  paymentHolder?: string;
+
+  @ApiPropertyOptional({ description: 'URL de la imagen del QR de cobro' })
+  @IsOptional() @IsString() @MaxLength(500)
+  paymentQrUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsString() @MaxLength(500)
+  paymentNotes?: string;
 }
 
 export class InitialAdminDto {

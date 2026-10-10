@@ -105,6 +105,23 @@ Supabase queda solo como base de datos. La lógica y los permisos viven en esta 
 | GET | `/public/:slug/menu`: empresa, horario, `isOpenNow` y categorías con productos y extras |
 | POST | `/public/:slug/orders`: devuelve el pedido y un `whatsappUrl` listo para abrir |
 
+## Pagos (sin pasarela)
+
+Cada restaurante configura en `PATCH /companies/:companyId` si acepta **efectivo** y/o
+**transferencia** (QR o llave Bre-B): `acceptsCash`, `acceptsTransfer`, `breBKey`,
+`paymentHolder`, `paymentQrUrl` y `paymentNotes`.
+
+1. El cliente crea el pedido con `paymentMethod: "transfer"`. La respuesta trae un
+   `proofToken` de un solo pedido.
+2. Sube la captura del pago a `POST /public/:slug/orders/:orderId/proof` (multipart con
+   `file` y `token`). Puede reemplazarla mientras el pedido siga pendiente.
+3. En el panel, el pedido muestra el comprobante y el admin lo pasa a `confirmed`
+   ("Confirmar pago").
+
+Todos los pedidos, también los de efectivo, quedan en `pending` hasta que el restaurante
+los confirma. El comprobante se guarda en `uploads/<companyId>/proofs/` con un nombre
+aleatorio.
+
 ## Decisiones importantes
 
 - **Los precios los calcula el servidor.** El pedido solo envía `productId`, `quantity` y los

@@ -1,8 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
-import { mkdirSync, writeFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CategoriesService } from '../categories/categories.service';
 import { PaymentMethod } from '../common/enums';
 import { CompaniesService } from '../companies/companies.service';
@@ -12,13 +8,7 @@ import { CreateOrderDto } from '../orders/dto/order.dto';
 import { Order } from '../orders/order.entity';
 import { OrdersService } from '../orders/orders.service';
 import { ProductsService } from '../products/products.service';
-
-const IMAGE_EXT: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/webp': '.webp',
-  'image/gif': '.gif',
-};
+import { FILE_STORAGE, FileStorage, IMAGE_TYPES } from '../storage/file-storage';
 
 @Injectable()
 export class PublicService {
@@ -27,7 +17,7 @@ export class PublicService {
     private readonly categories: CategoriesService,
     private readonly products: ProductsService,
     private readonly orders: OrdersService,
-    private readonly config: ConfigService,
+    @Inject(FILE_STORAGE) private readonly storage: FileStorage,
   ) {}
 
   /** Todo lo que necesita la app del cliente en UNA sola petición */
@@ -113,24 +103,20 @@ export class PublicService {
     file: Express.Multer.File | undefined,
   ) {
     if (!file) throw new BadRequestException('Envía la imagen en el campo "file"');
-    const ext = IMAGE_EXT[file.mimetype];
-    if (!ext) throw new BadRequestException('El comprobante debe ser una imagen');
+    if (!IMAGE_TYPES[file.mimetype]) {
+      throw new BadRequestException('El comprobante debe ser una imagen');
+    }
 
     const company = await this.companies.findActiveBySlug(slug);
     await this.orders.assertCanAttachProof(company.id, orderId, token);
 
-    // Se guarda en disco solo después de validar la clave
-    const dir = join(resolve(process.env.UPLOAD_DIR ?? 'uploads'), company.id, 'proofs');
-    mkdirSync(dir, { recursive: true });
-    const filename = `${randomUUID()}${ext}`;
-    writeFileSync(join(dir, filename), file.buffer);
-
-    const base = (this.config.get<string>('PUBLIC_URL') ?? 'http://localhost:3000').replace(/\/$/, '');
-    const order = await this.orders.setPaymentProof(
-      company.id,
-      orderId,
-      `${base}/uploads/${company.id}/proofs/${filename}`,
+    // Se guarda solo después de validar la clave (sin archivos huérfanos).
+    // Dónde se guarda lo decide el adaptador (disco o Cloudinary).
+    const stored = await this.storage.upload(
+      { buffer: file.buffer, mimetype: file.mimetype, originalName: file.originalname },
+      `${company.id}/proofs`,
     );
+    const order = await this.orders.setPaymentProof(company.id, orderId, stored.url);
     return { order, whatsappUrl: this.whatsappUrl(company, order) };
   }
 

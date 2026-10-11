@@ -1,12 +1,15 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/menu_brand.dart';
 import 'package:lacarta/core/widget/responsive.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get/state_manager.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/controller/category_controller.dart';
 import 'package:lacarta/core/controller/product_controller.dart';
+import 'package:lacarta/core/models/category.dart';
+import 'package:lacarta/core/models/product/producto.dart';
 import 'package:lacarta/core/widget/mobile/header_mobile.dart';
 import 'package:lacarta/core/widget/mobile/product_mobile.dart';
 import 'package:lacarta/core/widget/mobile/seach_mobile.dart';
@@ -22,6 +25,36 @@ class _HomePagesState extends State<HomePages> {
   final CategoryController categoryController = Get.put(CategoryController());
   final ScrollController _scrollController = ScrollController();
   int selectedCategory = 0;
+
+  /// Texto del buscador
+  String _query = '';
+
+  /// Productos de una categoría que coinciden con la búsqueda
+  List<Product> _productsFor(ProductCategory c) {
+    final q = _query.trim().toLowerCase();
+    return productController.products
+        .where((p) =>
+            p.categoryId == c.id &&
+            (q.isEmpty ||
+                p.name.toLowerCase().contains(q) ||
+                p.description.toLowerCase().contains(q)))
+        .toList();
+  }
+
+  /// Categorías con al menos un producto que coincide
+  List<ProductCategory> get _visibleCategories => categoryController
+      .categories
+      .where((c) => _productsFor(c).isNotEmpty)
+      .toList();
+
+  void _onSearch(String value) {
+    setState(() {
+      _query = value;
+      selectedCategory = 0;
+      _categoryOffsets.clear(); // las posiciones cambian al filtrar
+    });
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
+  }
   final Map<int, double> _categoryOffsets = {};
 
   @override
@@ -33,7 +66,8 @@ class _HomePagesState extends State<HomePages> {
   void _handleScroll() {
     double offset = _scrollController.offset;
 
-    for (int i = 0; i < categoryController.categories.length; i++) {
+    final count = _visibleCategories.length;
+    for (int i = 0; i < count; i++) {
       double? start = _categoryOffsets[i];
       double? nextStart = _categoryOffsets[i + 1];
 
@@ -76,7 +110,8 @@ class _HomePagesState extends State<HomePages> {
           SliverToBoxAdapter(child: HeaderMobile()),
           SliverPersistentHeader(
             pinned:  true, 
-            delegate: _CategoryHeaderDelegate(child: SeachMobile())),
+            delegate: _CategoryHeaderDelegate(
+                child: SeachMobile(onChanged: _onSearch))),
 
           SliverPersistentHeader(
             pinned: true,
@@ -86,13 +121,24 @@ class _HomePagesState extends State<HomePages> {
           ),
           
           Obx( (){
+              final cats = _visibleCategories;
+              if (cats.isEmpty && _query.trim().isNotEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Text(
+                      'No encontramos "${_query.trim()}" en el menú',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                );
+              }
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final category = categoryController.categories[index]; 
-                    final productsForCategory = productController.products
-                    .where((p) => p.categoryId == category.id)
-                    .toList();
+                    final category = cats[index];
+                    final productsForCategory = _productsFor(category);
                     // Builder (no LayoutBuilder): solo se necesita el context
                     // para medir la posición de la categoría
                     return Builder(
@@ -111,7 +157,7 @@ class _HomePagesState extends State<HomePages> {
                       },
                     );
                   },
-                  childCount: categoryController.categories.length,
+                  childCount: cats.length,
                 ),
               );
             }
@@ -124,13 +170,14 @@ class _HomePagesState extends State<HomePages> {
 
 
  Widget _buildCategory() {
+  final cats = _visibleCategories;
   return Container(
     color: CustomColorBasic.white2,
     child: ListView.builder(
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      itemCount: categoryController.categories.length,
+      itemCount: cats.length,
       itemBuilder: (context, index) {
 
         final bool isSelected = selectedCategory == index;
@@ -160,12 +207,12 @@ class _HomePagesState extends State<HomePages> {
             ),
             child: Center(
               child: Text(
-                categoryController.categories[index].name,
+                cats[index].name,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                   color: isSelected
-                      ? CustomColorBasic.yellow
+                      ? MenuBrand.color
                       : CustomColorBasic.grey1,
                 ),
               ),

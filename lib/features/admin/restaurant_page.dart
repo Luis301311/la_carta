@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/menu_brand.dart';
 import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -53,6 +54,9 @@ class _RestaurantPageState extends State<RestaurantPage> {
   Company? _company;
   String? _logoUrl;
   String? _coverUrl;
+
+  /// Color del menú del cliente (null = el de la plataforma)
+  Color? _brand;
   LatLng? _point;
   late List<_Day> _days;
 
@@ -105,6 +109,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
       _address.text = c.location.address;
       _logoUrl = c.logoUrl.isEmpty ? null : c.logoUrl;
       _coverUrl = c.coverUrl;
+      _brand = MenuBrand.parse(c.primaryColor);
       _point = c.location.hasCoordinates
           ? LatLng(c.location.lat!, c.location.lng!)
           : null;
@@ -214,6 +219,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
         'longitude': _point?.longitude,
         'logoUrl': _logoUrl,
         'coverUrl': _coverUrl,
+        if (_brand != null) 'primaryColor': MenuBrand.toHex(_brand!),
       });
       // 2) Horario
       await _service.setHours(
@@ -536,6 +542,66 @@ class _RestaurantPageState extends State<RestaurantPage> {
     );
   }
 
+  Widget _brandSection() {
+    final current = _brand ?? MenuBrand.fallback;
+    return _section(
+      'Color del menú',
+      Icons.palette_outlined,
+      subtitle:
+          'Es el color de los botones y detalles que ven tus clientes en el menú.',
+      [
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: MenuBrand.palette.entries.map((e) {
+            final selected = current.toARGB32() == e.value.toARGB32();
+            return Tooltip(
+              message: e.key,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () => setState(() => _brand = e.value),
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: e.value,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected ? AppColors.carbon : Colors.white,
+                      width: 3,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 3),
+                    ],
+                  ),
+                  child: selected
+                      ? Icon(Icons.check, color: MenuBrand.on(e.value))
+                      : null,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 14),
+        // Vista previa del botón principal del menú
+        Row(
+          children: [
+            const Text('Vista previa: '),
+            const SizedBox(width: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: current,
+                foregroundColor: MenuBrand.on(current),
+              ),
+              onPressed: () {},
+              child: const Text('Confirmar pedido'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _linkSection() {
     final slug = _company?.slug ?? '';
     if (slug.isEmpty) return const SizedBox.shrink();
@@ -612,6 +678,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                           _dataSection(),
                           _locationSection(),
                           _hoursSection(),
+                          _brandSection(),
                           _linkSection(),
                         ],
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/app_pages.dart';
@@ -11,18 +12,42 @@ import 'package:lacarta/core/controller/company_controller.dart';
 import 'package:lacarta/core/controller/order_controller.dart';
 import 'package:lacarta/core/services/api_client.dart';
 import 'package:lacarta/core/services/menu_service.dart';
+import 'package:lacarta/features/menu/pages/index_pages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // El restaurante sale de la URL: lacarta.app/burger_house
-  // (en desarrollo, sin slug en la URL, se usa ApiConfig.defaultSlug)
+  // URLs limpias: lacarta.app/burger_house y lacarta.app/admin/orders (sin "#").
+  // El hosting debe redirigir todas las rutas a index.html (render.yaml lo hace).
+  usePathUrlStrategy();
+
+  // ¿Qué se abrió? El primer tramo de la URL decide:
+  //  /admin/... o /login  -> panel (no necesita cargar ningún menú)
+  //  /burger_house        -> menú de ese restaurante
+  //  /                    -> en desarrollo, ApiConfig.defaultSlug
+  const panelSegments = {'admin', 'login'};
   final segments = Uri.base.pathSegments.where((s) => s.isNotEmpty).toList();
-  Session.slug = segments.isNotEmpty ? segments.first : ApiConfig.defaultSlug;
+  final first = segments.isNotEmpty ? segments.first : null;
+  final isPanel = first != null && panelSegments.contains(first);
+  Session.slug = (first != null && !isPanel && first != 'menu')
+      ? first
+      : ApiConfig.defaultSlug;
 
   // Sesión del panel guardada en el dispositivo (si la hay)
   final auth = Get.put(AuthController(), permanent: true);
   await auth.restore();
+
+  if (isPanel) {
+    runApp(const MyApp());
+    return;
+  }
+  if (Session.slug.isEmpty) {
+    // Producción, raíz del sitio sin restaurante
+    runApp(const ErrorApp(
+      message: 'Abre el enlace o escanea el código QR de tu restaurante para ver su menú.',
+    ));
+    return;
+  }
 
   try {
     // Una sola petición trae empresa, horario, categorías y productos
@@ -35,13 +60,6 @@ Future<void> main() async {
 
     runApp(const MyApp());
   } on ApiException catch (e) {
-    // Si lo que se abrió es el panel (/#/login, /#/admin...), no hace falta
-    // el menú público: se arranca la app igual.
-    final route = Uri.base.fragment;
-    if (route.startsWith(AppRoutes.login) || route.startsWith(AppRoutes.admin)) {
-      runApp(const MyApp());
-      return;
-    }
     runApp(ErrorApp(
       message: e.statusCode == 404
           ? 'No encontramos el restaurante "${Session.slug}".'
@@ -62,6 +80,8 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light(),
       initialRoute: AppRoutes.menu,
       getPages: AppPages.pages,
+      // /burger_house (o cualquier ruta que no sea del panel) -> el menú
+      unknownRoute: GetPage(name: '/menu-slug', page: () => const IndexPages()),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/menu_brand.dart';
 import 'package:lacarta/core/widget/responsive.dart';
 import 'package:get/get.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
@@ -337,7 +338,7 @@ class ProductDetailPage extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: CustomColorBasic.blue1,
+                            backgroundColor: MenuBrand.color,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           onPressed: () {
@@ -358,9 +359,9 @@ class ProductDetailPage extends StatelessWidget {
                               )
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             "Comprar ahora",
-                            style: TextStyle(fontSize: 16, color: CustomColorBasic.white1),
+                            style: TextStyle(fontSize: 16, color: MenuBrand.onColor),
                           ),
                         ),
                       ),

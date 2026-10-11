@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/menu_brand.dart';
 import 'package:get/get.dart';
-import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/constant/order_status.dart';
 import 'package:lacarta/core/widget/mobile/form/order_form.dart';
 
@@ -36,7 +36,7 @@ class OrderTypeSelector extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 6),
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            color: selected ? CustomColorBasic.yellow : Colors.grey.shade200,
+            color: selected ? MenuBrand.color : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -46,7 +46,7 @@ class OrderTypeSelector extends StatelessWidget {
               Icon(
                 icon,
                 size: 32,
-                color: selected ? Colors.white : Colors.black,
+                color: selected ? MenuBrand.onColor : Colors.black,
               ),
               const SizedBox(height: 8),
               Text(
@@ -54,7 +54,7 @@ class OrderTypeSelector extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 style: TextStyle(
-                    color: selected ? Colors.white : Colors.black,
+                    color: selected ? MenuBrand.onColor : Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 12),
               )

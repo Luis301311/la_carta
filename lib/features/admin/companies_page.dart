@@ -10,6 +10,7 @@ import 'package:lacarta/core/services/super_admin_service.dart';
 import 'package:lacarta/core/widget/responsive.dart';
 import 'package:lacarta/features/admin/super/company_admins_sheet.dart';
 import 'package:lacarta/features/admin/super/company_form_dialog.dart';
+import 'package:lacarta/features/auth/change_password_dialog.dart';
 
 /// Panel del SUPER ADMIN: todas las empresas de la plataforma.
 /// Crear (con su admin), editar, suspender/reactivar, administradores,
@@ -90,7 +91,7 @@ class _CompaniesPageState extends State<CompaniesPage> {
       if (r.adminEmail != null) {
         text
           ..writeln()
-          ..writeln('Panel de administración: ${_menuLink('')}#/login')
+          ..writeln('Panel de administración: ${_menuLink('login')}')
           ..writeln('Usuario: ${r.adminEmail}')
           ..writeln('Contraseña: ${r.adminPassword}');
       }
@@ -211,6 +212,11 @@ class _CompaniesPageState extends State<CompaniesPage> {
             tooltip: 'Actualizar',
             icon: const Icon(Icons.refresh),
             onPressed: _load,
+          ),
+          IconButton(
+            tooltip: 'Cambiar contraseña',
+            icon: const Icon(Icons.key),
+            onPressed: () => showChangePasswordDialog(context),
           ),
           IconButton(
             tooltip: 'Cerrar sesión',

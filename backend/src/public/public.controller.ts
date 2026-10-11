@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { memoryStorage } from 'multer';
 import { Public } from '../auth/decorators/public.decorator';
 import { CreateOrderDto } from '../orders/dto/order.dto';
@@ -28,6 +29,8 @@ export class PublicController {
     return this.publicService.getMenu(slug);
   }
 
+  // Máximo 15 pedidos por minuto por IP (evita pedidos falsos en masa)
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post('orders')
   createOrder(@Param('slug') slug: string, @Body() dto: CreateOrderDto) {
     return this.publicService.createOrder(slug, dto);

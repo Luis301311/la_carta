@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/menu_brand.dart';
 import 'package:get/get.dart';
-import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/core/constant/order_status.dart';
 import 'package:lacarta/core/controller/cart_controller.dart';
 import 'package:lacarta/core/controller/company_controller.dart';
@@ -211,22 +211,22 @@ class _OrderFormState extends State<OrderForm> {
                   final sending = _orderController.isSending.value;
                   return ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: CustomColorBasic.blue1,
+                      backgroundColor: MenuBrand.color,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: sending ? null : _submit,
                     child: sending
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: CustomColorBasic.white1,
+                              color: MenuBrand.onColor,
                             ),
                           )
-                        : const Text(
+                        : Text(
                             'Confirmar pedido',
-                            style: TextStyle(color: CustomColorBasic.white1),
+                            style: TextStyle(color: MenuBrand.onColor),
                           ),
                   );
                 }),

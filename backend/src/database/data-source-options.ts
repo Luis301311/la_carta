@@ -23,7 +23,11 @@ export function buildDataSourceOptions(): DataSourceOptions {
         }),
     ssl,
     entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
+    migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
+    // Desarrollo: DB_SYNC=true (TypeORM ajusta las tablas solo).
+    // Producción: DB_SYNC=false y DB_MIGRATIONS_RUN=true (aplica las migraciones al arrancar).
     synchronize: env.DB_SYNC === 'true',
+    migrationsRun: env.DB_MIGRATIONS_RUN === 'true',
     logging: env.DB_LOGGING === 'true',
     namingStrategy: new SnakeNamingStrategy(),
   };

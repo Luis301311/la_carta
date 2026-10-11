@@ -1,6 +1,7 @@
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:lacarta/core/constant/menu_brand.dart';
 import 'package:lacarta/core/constant/custom_colors.dart';
 import 'package:lacarta/features/menu/pages/cart_page.dart';
 import 'package:lacarta/features/menu/pages/home_pages.dart';
@@ -35,7 +36,7 @@ class _IndexPagesState extends State<IndexPages> {
           });
         },
         backgroundColor: CustomColorBasic.white2, // Fondo detrás de la barra de navegación
-        buttonBackgroundColor: CustomColorBasic.yellow2, // Fondo del botón activo
+        buttonBackgroundColor: MenuBrand.color, // color del restaurante
         color: CustomColorBasic.white1, // Color de la barra de navegación
         animationDuration: const Duration(milliseconds: 300), // Ajuste del tiempo de animación
         animationCurve: Curves.easeInOut, // Añadir curva de animación suave
@@ -51,7 +52,7 @@ Widget _buildNavItem(IconData icon, String label, int index,) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      Icon(icon, size: 30, color: selectedIndex == index ? Colors.black : Colors.black),
+      Icon(icon, size: 30, color: selectedIndex == index ? MenuBrand.onColor : Colors.black),
       if (selectedIndex != index)
         Text(
           label,

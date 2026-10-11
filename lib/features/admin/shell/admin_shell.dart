@@ -4,6 +4,7 @@ import 'package:lacarta/config/app_routes.dart';
 import 'package:lacarta/core/constant/app_colors.dart';
 import 'package:lacarta/core/controller/auth_controller.dart';
 import 'package:lacarta/features/admin/shell/admin_shell_controller.dart';
+import 'package:lacarta/features/auth/change_password_dialog.dart';
 
 /// Ancho desde el que se usa barra lateral en vez de barra inferior
 const double kSidebarBreakpoint = 900;
@@ -181,6 +182,11 @@ class _Sidebar extends StatelessWidget {
                           style: const TextStyle(color: Colors.white70, fontSize: 13),
                         )),
                   ),
+                  IconButton(
+                    tooltip: 'Cambiar contraseña',
+                    icon: const Icon(Icons.key, color: Colors.white70),
+                    onPressed: () => showChangePasswordDialog(context),
+                  ),
                   if (auth.isSuperAdmin)
                     IconButton(
                       tooltip: 'Cambiar de empresa',
@@ -310,6 +316,14 @@ class _BottomNav extends StatelessWidget {
                 },
               ),
             const Divider(),
+            ListTile(
+              leading: const Icon(Icons.key),
+              title: const Text('Cambiar contraseña'),
+              onTap: () {
+                Navigator.pop(ctx);
+                showChangePasswordDialog(context);
+              },
+            ),
             if (auth.isSuperAdmin)
               ListTile(
                 leading: const Icon(Icons.swap_horiz),

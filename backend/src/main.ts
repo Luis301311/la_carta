@@ -11,6 +11,11 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Render (y casi cualquier hosting) pone un proxy delante: así req.ip es la
+  // IP real del cliente y el límite de peticiones funciona por persona
+  app.set('trust proxy', 1);
+  app.enableShutdownHooks();
+
   const origins = (process.env.CORS_ORIGINS ?? '')
     .split(',')
     .map((o) => o.trim())
@@ -25,11 +30,14 @@ async function bootstrap() {
     }),
   );
 
-  // Imágenes subidas: GET /uploads/<companyId>/<archivo>
-  app.useStaticAssets(resolve(process.env.UPLOAD_DIR ?? 'uploads'), {
-    prefix: '/uploads/',
-    index: false,
-  });
+  // Solo con almacenamiento local: servir las imágenes en /uploads/...
+  // (con Cloudinary las URLs ya apuntan a Cloudinary)
+  if ((process.env.STORAGE_DRIVER ?? 'local').toLowerCase() === 'local') {
+    app.useStaticAssets(resolve(process.env.UPLOAD_DIR ?? 'uploads'), {
+      prefix: '/uploads/',
+      index: false,
+    });
+  }
 
   const swagger = new DocumentBuilder()
     .setTitle('La Carta API')

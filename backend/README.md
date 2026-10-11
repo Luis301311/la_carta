@@ -151,11 +151,15 @@ companies 1─* orders 1─* order_items 1─* order_item_extras
 
 ## Producción
 
-- Pon `DB_SYNC=false` y crea las tablas con `docs/schema.sql` o con migraciones de TypeORM.
-- Cambia `JWT_SECRET` y la contraseña del super admin.
-- Define `CORS_ORIGINS` con el dominio de la app web.
-- Las imágenes se guardan en disco (`uploads/`). Para producción conviene S3, Cloudinary o
-  Supabase Storage; solo hay que cambiar `uploads.controller.ts`.
+Ver **`DEPLOY.md`** en la raíz del repositorio (Render + Neon + Cloudinary).
+
+- **Migraciones:** `npm run migration:generate -- src/database/migrations/Nombre` y
+  `npm run migration:run`. En producción: `DB_SYNC=false` y `DB_MIGRATIONS_RUN=true`.
+- **Archivos:** `STORAGE_DRIVER=local` (disco, desarrollo) o `cloudinary` (producción). El código
+  usa la interfaz `FileStorage` (`src/storage/`), así que cambiar de proveedor es agregar un
+  adaptador nuevo sin tocar controladores ni servicios.
+- **Salud:** `GET /health` (lo usa Render).
+- **Límite de peticiones:** general 300/min por IP, login 10/min y pedidos 15/min.
 
 ## Conectar la app Flutter
 

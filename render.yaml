@@ -1,0 +1,57 @@
+# Blueprint de Render: crea la API y la app web desde este repositorio.
+# Render -> New -> Blueprint -> elige el repo. Los valores con `sync: false`
+# te los pide Render la primera vez (ver DEPLOY.md).
+services:
+  # ---------------------------------------------------------------- API
+  - type: web
+    name: lacarta-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    # --include=dev: `nest build` necesita las dependencias de desarrollo
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL # cadena de conexión de Neon
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SYNC
+        value: "false"
+      - key: DB_MIGRATIONS_RUN
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN_SECONDS
+        value: "86400"
+      - key: STORAGE_DRIVER
+        value: cloudinary
+      - key: CLOUDINARY_URL # cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: lacarta
+      - key: PUBLIC_URL # https://lacarta-api.onrender.com
+        sync: false
+      - key: CORS_ORIGINS # https://lacarta-web.onrender.com
+        sync: false
+
+  # ---------------------------------------------------------- App web (Flutter)
+  - type: web
+    name: lacarta-web
+    runtime: static
+    # Render no trae Flutter: el script lo descarga y compila (ver scripts/)
+    buildCommand: bash scripts/render_build_web.sh
+    staticPublishPath: build/web
+    autoDeploy: true
+    envVars:
+      - key: API_URL # https://lacarta-api.onrender.com
+        sync: false
+    routes:
+      # URLs limpias (/burger_house, /admin/orders): todo lo sirve index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html

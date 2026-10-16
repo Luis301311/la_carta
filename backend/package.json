@@ -12,9 +12,9 @@
     "seed": "ts-node -r tsconfig-paths/register src/database/seed.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "typeorm": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
-    "migration:generate": "npm run typeorm -- migration:generate",
-    "migration:run": "npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert"
+    "migration:generate": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:generate",
+    "migration:run": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:revert"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -51,6 +51,7 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.0"
   },
+  "packageManager": "pnpm@11.22.0",
   "engines": {
     "node": ">=20"
   }

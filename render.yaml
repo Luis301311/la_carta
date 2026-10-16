@@ -8,9 +8,9 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    # --include=dev: `nest build` necesita las dependencias de desarrollo
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm run start:prod
+    # pnpm instala también devDependencies: `nest build` las necesita
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run build
+    startCommand: pnpm run start:prod
     healthCheckPath: /health
     autoDeploy: true
     envVars:

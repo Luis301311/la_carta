@@ -4,8 +4,6 @@ import { v2 as cloudinary } from 'cloudinary';
 import { FileStorage, StoredFile, UploadInput } from './file-storage';
 
 export interface CloudinaryOptions {
-  /** CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME (o los 3 datos por separado) */
-  url?: string;
   cloudName?: string;
   apiKey?: string;
   apiSecret?: string;
@@ -13,29 +11,27 @@ export interface CloudinaryOptions {
   rootFolder: string;
 }
 
-/** ADAPTADOR Cloudinary (producción) */
+/**
+ * ADAPTADOR Cloudinary (producción). Recibe las credenciales ya resueltas
+ * por AppConfig (que entiende tanto CLOUDINARY_URL como los 3 datos sueltos).
+ */
 export class CloudinaryFileStorage implements FileStorage {
   readonly driver = 'cloudinary';
   private readonly logger = new Logger(CloudinaryFileStorage.name);
 
   constructor(private readonly opts: CloudinaryOptions) {
-    if (opts.url) {
-      // El SDK lee CLOUDINARY_URL del entorno; se fuerza https
-      process.env.CLOUDINARY_URL = opts.url;
-      cloudinary.config({ secure: true });
-    } else if (opts.cloudName && opts.apiKey && opts.apiSecret) {
-      cloudinary.config({
-        cloud_name: opts.cloudName,
-        api_key: opts.apiKey,
-        api_secret: opts.apiSecret,
-        secure: true,
-      });
-    } else {
+    if (!opts.cloudName || !opts.apiKey || !opts.apiSecret) {
       throw new Error(
         'STORAGE_DRIVER=cloudinary pero faltan credenciales: define CLOUDINARY_URL ' +
           'o CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET',
       );
     }
+    cloudinary.config({
+      cloud_name: opts.cloudName,
+      api_key: opts.apiKey,
+      api_secret: opts.apiSecret,
+      secure: true,
+    });
   }
 
   upload(file: UploadInput, folder: string): Promise<StoredFile> {

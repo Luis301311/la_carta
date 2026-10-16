@@ -4,12 +4,12 @@
  *  - Si SEED_DEMO=true, crea el restaurante de prueba "burger_house" con su admin y un menú.
  * Se puede correr varias veces: no duplica nada.
  */
-import 'dotenv/config';
 import 'reflect-metadata';
 import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
 import { Category } from '../categories/category.entity';
 import { Role } from '../common/enums';
+import { loadConfig } from '../config/app-config';
 import { BusinessHour } from '../companies/business-hour.entity';
 import { Company } from '../companies/company.entity';
 import { ExtraGroup } from '../products/extra-group.entity';
@@ -141,19 +141,20 @@ async function seedDemo(ds: DataSource) {
 }
 
 async function main() {
-  const ds = new DataSource(buildDataSourceOptions());
+  const config = loadConfig();
+  const ds = new DataSource(buildDataSourceOptions(config.database));
   await ds.initialize();
   console.log('Conectado a la base de datos');
 
   console.log('Super admin:');
   await upsertUser(ds, {
-    email: process.env.SUPERADMIN_EMAIL ?? 'superadmin@lacarta.app',
-    password: process.env.SUPERADMIN_PASSWORD ?? 'CambiaEsto123',
-    fullName: process.env.SUPERADMIN_NAME ?? 'Super Admin',
+    email: config.seed.superAdminEmail,
+    password: config.seed.superAdminPassword,
+    fullName: config.seed.superAdminName,
     role: Role.SUPER_ADMIN,
   });
 
-  if (process.env.SEED_DEMO === 'true') {
+  if (config.seed.demo) {
     console.log('Datos de prueba:');
     await seedDemo(ds);
   }

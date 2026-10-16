@@ -149,12 +149,28 @@ companies 1─* categories 1─* products 1─* extra_groups 1─* extra_options
 companies 1─* orders 1─* order_items 1─* order_item_extras
 ```
 
+## Configuración (variables de entorno)
+
+Todas las variables pasan por `src/config/` y nadie más lee `process.env`:
+
+| Archivo | Rol |
+|---|---|
+| `env.validation.ts` | Reglas de cada variable: tipo, si es obligatoria y valor por defecto. |
+| `app-config.ts` | `loadConfig()` valida **una sola vez** y devuelve `AppConfig`, tipado y congelado (singleton). |
+| `config.module.ts` | Lo expone a Nest como `APP_CONFIG`: `@Inject(APP_CONFIG) config: AppConfig`. |
+
+Si algo falta o está mal, la API **no arranca** y el log dice qué variable revisar. Con
+`NODE_ENV=production` además exige `JWT_SECRET` de 32+ caracteres y `DB_SYNC=false`.
+
+Para agregar una variable: regla en `env.validation.ts` → campo en su grupo de `AppConfig` →
+usarla como `config.<grupo>.<campo>`.
+
 ## Producción
 
-Ver **`DEPLOY.md`** en la raíz del repositorio (Render + Neon + Cloudinary).
+Despliegue en Render + Neon + Cloudinary (ver `render.yaml` en la raíz).
 
-- **Migraciones:** `npm run migration:generate -- src/database/migrations/Nombre` y
-  `npm run migration:run`. En producción: `DB_SYNC=false` y `DB_MIGRATIONS_RUN=true`.
+- **Migraciones:** `pnpm migration:generate src/database/migrations/Nombre` y
+  `pnpm migration:run`. En producción: `DB_SYNC=false` y `DB_MIGRATIONS_RUN=true`.
 - **Archivos:** `STORAGE_DRIVER=local` (disco, desarrollo) o `cloudinary` (producción). El código
   usa la interfaz `FileStorage` (`src/storage/`), así que cambiar de proveedor es agregar un
   adaptador nuevo sin tocar controladores ni servicios.

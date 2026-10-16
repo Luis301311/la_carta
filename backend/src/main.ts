@@ -1,14 +1,16 @@
-// Carga .env antes que cualquier otro import (algunos decoradores leen process.env)
-import 'dotenv/config';
 import 'reflect-metadata';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { resolve } from 'path';
-import { AppModule } from './app.module';
+import { AppConfig, loadConfig } from './config/app-config';
+import { InvalidEnvironmentError } from './config/env.validation';
 
-async function bootstrap() {
+async function bootstrap(config: AppConfig) {
+  // Se importa DESPUÉS de validar la configuración: algunos decoradores
+  // (p. ej. el límite de tamaño de las subidas) la leen al cargarse
+  const { AppModule } = await import('./app.module');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Render (y casi cualquier hosting) pone un proxy delante: así req.ip es la
@@ -16,11 +18,8 @@ async function bootstrap() {
   app.set('trust proxy', 1);
   app.enableShutdownHooks();
 
-  const origins = (process.env.CORS_ORIGINS ?? '')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
-  app.enableCors({ origin: origins.length ? origins : true });
+  const origins = config.server.corsOrigins;
+  app.enableCors({ origin: origins.length ? [...origins] : true });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -32,8 +31,8 @@ async function bootstrap() {
 
   // Solo con almacenamiento local: servir las imágenes en /uploads/...
   // (con Cloudinary las URLs ya apuntan a Cloudinary)
-  if ((process.env.STORAGE_DRIVER ?? 'local').toLowerCase() === 'local') {
-    app.useStaticAssets(resolve(process.env.UPLOAD_DIR ?? 'uploads'), {
+  if (config.storage.driver === 'local') {
+    app.useStaticAssets(resolve(config.storage.local.uploadDir), {
       prefix: '/uploads/',
       index: false,
     });
@@ -49,8 +48,22 @@ async function bootstrap() {
     swaggerOptions: { persistAuthorization: true },
   });
 
-  const port = parseInt(process.env.PORT ?? '3000', 10);
-  await app.listen(port);
-  Logger.log(`API lista en http://localhost:${port}  ·  Swagger: http://localhost:${port}/docs`, 'Bootstrap');
+  await app.listen(config.server.port);
+  Logger.log(
+    `API lista en el puerto ${config.server.port} (${config.env})  ·  Swagger: /docs`,
+    'Bootstrap',
+  );
 }
-bootstrap();
+
+// Fail-fast: si el .env está mal, se explica qué falta y no arranca
+let config: AppConfig;
+try {
+  config = loadConfig();
+} catch (err) {
+  if (err instanceof InvalidEnvironmentError) {
+    Logger.error(err.message, undefined, 'Config');
+    process.exit(1);
+  }
+  throw err;
+}
+bootstrap(config);

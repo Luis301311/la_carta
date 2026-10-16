@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,6 +7,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CategoriesModule } from './categories/categories.module';
 import { CompaniesModule } from './companies/companies.module';
+import { APP_CONFIG, AppConfig } from './config/app-config';
+import { AppConfigModule } from './config/config.module';
 import { buildDataSourceOptions } from './database/data-source-options';
 import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
@@ -20,8 +21,11 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRootAsync({ useFactory: () => buildDataSourceOptions() }),
+    AppConfigModule, // configuración validada (singleton), disponible en toda la app
+    TypeOrmModule.forRootAsync({
+      inject: [APP_CONFIG],
+      useFactory: (config: AppConfig) => buildDataSourceOptions(config.database),
+    }),
     // Límite general de peticiones por IP (las rutas sensibles tienen el suyo).
     // Alto a propósito: varias pantallas del panel en la misma red comparten IP.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),

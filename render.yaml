@@ -8,14 +8,18 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    # pnpm instala también devDependencies: `nest build` las necesita
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run build
+    # NODE_ENV=development solo para instalar: así pnpm también instala las
+    # devDependencies que necesita `nest build`. La API corre con NODE_ENV=production.
+    buildCommand: corepack enable && NODE_ENV=development pnpm install --frozen-lockfile && pnpm run build
     startCommand: pnpm run start:prod
     healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
         value: "22"
+      # Activa las reglas de producción de src/config/env.validation.ts
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL # cadena de conexión de Neon
         sync: false
       - key: DB_SSL

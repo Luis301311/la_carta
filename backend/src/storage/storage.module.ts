@@ -1,5 +1,5 @@
 import { Global, Logger, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { APP_CONFIG, AppConfig } from '../config/app-config';
 import { CloudinaryFileStorage } from './cloudinary-file-storage';
 import { FILE_STORAGE, FileStorage } from './file-storage';
 import { LocalFileStorage } from './local-file-storage';
@@ -13,29 +13,23 @@ import { LocalFileStorage } from './local-file-storage';
   providers: [
     {
       provide: FILE_STORAGE,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): FileStorage => {
-        const driver = (config.get<string>('STORAGE_DRIVER') ?? 'local').toLowerCase();
+      inject: [APP_CONFIG],
+      useFactory: ({ storage: cfg }: AppConfig): FileStorage => {
         let storage: FileStorage;
-        switch (driver) {
+        switch (cfg.driver) {
           case 'cloudinary':
-            storage = new CloudinaryFileStorage({
-              url: config.get<string>('CLOUDINARY_URL'),
-              cloudName: config.get<string>('CLOUDINARY_CLOUD_NAME'),
-              apiKey: config.get<string>('CLOUDINARY_API_KEY'),
-              apiSecret: config.get<string>('CLOUDINARY_API_SECRET'),
-              rootFolder: config.get<string>('CLOUDINARY_FOLDER') ?? 'lacarta',
-            });
+            storage = new CloudinaryFileStorage(cfg.cloudinary);
             break;
-          // case 's3': storage = new S3FileStorage({...}); break;
+          // case 's3': storage = new S3FileStorage(cfg.s3); break;
           case 'local':
-            storage = new LocalFileStorage(
-              config.get<string>('UPLOAD_DIR') ?? 'uploads',
-              config.get<string>('PUBLIC_URL') ?? 'http://localhost:3000',
-            );
+            storage = new LocalFileStorage(cfg.local.uploadDir, cfg.local.publicUrl);
             break;
-          default:
-            throw new Error(`STORAGE_DRIVER desconocido: "${driver}" (usa local o cloudinary)`);
+          default: {
+            // Si agregas un driver en env.validation.ts y olvidas este case,
+            // TypeScript marca error aquí
+            const unknownDriver: never = cfg.driver;
+            throw new Error(`STORAGE_DRIVER sin adaptador: ${String(unknownDriver)}`);
+          }
         }
         new Logger('StorageModule').log(`Almacenamiento de archivos: ${storage.driver}`);
         return storage;

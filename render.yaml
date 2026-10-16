@@ -5,6 +5,7 @@ services:
   # ---------------------------------------------------------------- API
   - type: web
     name: lacarta-api
+    branch: production # solo se despliega lo que llega a esta rama
     runtime: node
     plan: free
     rootDir: backend
@@ -46,6 +47,7 @@ services:
   # ---------------------------------------------------------- App web (Flutter)
   - type: web
     name: lacarta-web
+    branch: production
     runtime: static
     # Render no trae Flutter: el script lo descarga y compila (ver scripts/)
     buildCommand: bash scripts/render_build_web.sh

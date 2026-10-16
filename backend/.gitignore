@@ -1,5 +1,6 @@
 node_modules/
 dist/
-uploads/
+# Solo la carpeta de archivos subidos en la raíz de backend (no src/uploads)
+/uploads/
 .env
 *.tsbuildinfo
